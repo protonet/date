@@ -212,8 +212,8 @@ describe('yesterday', function () {
     assert('5/12/13' == d(date));
   });
 
-  it('yesterday at 15', function () {
-    var date = parse('yesterday at 15', mon);
+  it('Yesterday at 15', function () {
+    var date = parse('Yesterday at 15', mon);
     assert('15:00:00' == t(date));
     assert('5/12/13' == d(date));
   });

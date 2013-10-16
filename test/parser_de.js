@@ -10,132 +10,132 @@ var assert = require('better-assert');
  */
 
 var mon = new Date('May 13, 2013 01:30:00');
-
-/**
- * Test parser
- */
-
-/**
- * Minutes
- */
-
-describe('minutes', function () {
-  it('10m', function () {
-    var date = parse('10m', mon);
-    assert('1:40:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('10min', function () {
-    var date = parse('10min', mon);
-    assert('1:40:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-  
-  it('10 Min', function () {
-    var date = parse('10 Min', mon);
-    assert('1:40:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('10 Minuten', function () {
-    var date = parse('10 Minuten', mon);
-    assert('1:40:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('10 Minuten ab jetzt', function () {
-    var date = parse('10 Minuten ab jetzt', mon);
-    assert('1:40:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('10 Minuten ab Morgen', function () {
-    var date = parse('10 Minuten ab Morgen', mon);
-    assert('1:40:00' == t(date));
-    assert('5/14/13' == d(date));
-  });
-});
-
-/**
- * Hours
- */
-
-describe('stunden', function() {
-  it('in 5 stunden', function () {
-    var date = parse('in 5 stunden', mon);
-    assert('6:30:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-  
-  it('in 5 Std', function () {
-    var date = parse('in 5 Std', mon);
-    assert('6:30:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 5 Uhr', function () {
-    var date = parse('um 5 Uhr', mon);
-    assert('5:00:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 17 Uhr', function () {
-    var date = parse('um 17 Uhr', mon);
-    assert('17:00:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 5', function () {
-    var date = parse('um 5', mon);
-    assert('5:00:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 17', function () {
-    var date = parse('um 17', mon);
-    assert('17:00:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 12:30', function () {
-    var date = parse('um 12:30', mon);
-    assert('12:30:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 12.30', function () {
-    var date = parse('um 12.30', mon);
-    assert('12:30:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 23:35', function () {
-    var date = parse('um 23:35', mon);
-    assert('23:35:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
-  it('um 0:30', function () {
-    var date = parse('um 0:30', mon);
-    assert('0:30:00' == t(date));
-    assert('5/14/13' == d(date));
-  });
-});
+// 
+// /**
+//  * Test parser
+//  */
+// 
+// /**
+//  * Minutes
+//  */
+// 
+// describe('minutes', function () {
+//   it('10m', function () {
+//     var date = parse('10m', mon);
+//     assert('1:40:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('10min', function () {
+//     var date = parse('10min', mon);
+//     assert('1:40:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+//   
+//   it('10 Min', function () {
+//     var date = parse('10 Min', mon);
+//     assert('1:40:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('10 Minuten', function () {
+//     var date = parse('10 Minuten', mon);
+//     assert('1:40:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('10 Minuten ab jetzt', function () {
+//     var date = parse('10 Minuten ab jetzt', mon);
+//     assert('1:40:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('10 Minuten ab Morgen', function () {
+//     var date = parse('10 Minuten ab Morgen', mon);
+//     assert('1:40:00' == t(date));
+//     assert('5/14/13' == d(date));
+//   });
+// });
+// 
+// /**
+//  * Hours
+//  */
+// 
+// describe('stunden', function() {
+//   it('in 5 stunden', function () {
+//     var date = parse('in 5 stunden', mon);
+//     assert('6:30:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+//   
+//   it('in 5 Std', function () {
+//     var date = parse('in 5 Std', mon);
+//     assert('6:30:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 5 Uhr', function () {
+//     var date = parse('um 5 Uhr', mon);
+//     assert('5:00:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 17 Uhr', function () {
+//     var date = parse('um 17 Uhr', mon);
+//     assert('17:00:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 5', function () {
+//     var date = parse('um 5', mon);
+//     assert('5:00:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 17', function () {
+//     var date = parse('um 17', mon);
+//     assert('17:00:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 12:30', function () {
+//     var date = parse('um 12:30', mon);
+//     assert('12:30:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 12.30', function () {
+//     var date = parse('um 12.30', mon);
+//     assert('12:30:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 23:35', function () {
+//     var date = parse('um 23:35', mon);
+//     assert('23:35:00' == t(date));
+//     assert('5/13/13' == d(date));
+//   });
+// 
+//   it('um 0:30', function () {
+//     var date = parse('um 0:30', mon);
+//     assert('0:30:00' == t(date));
+//     assert('5/14/13' == d(date));
+//   });
+// });
 // 
 // /**
 //  * Days
 //  */
 // 
-// describe('days', function () {
-//   it('in 2 days', function () {
-//     var date = parse('in 2 days', mon);
+// describe('tage', function () {
+//   it('in 2 tagen', function () {
+//     var date = parse('in 2 tagen', mon);
 //     assert('1:30:00' == t(date));
 //     assert('5/15/13' == d(date));
 //   });
 // 
-//   it('in 2d', function () {
-//     var date = parse('in 2d', mon);
+//   it('in 2 tage', function () {
+//     var date = parse('in 2 tage', mon);
 //     assert('1:30:00' == t(date));
 //     assert('5/15/13' == d(date));
 //   });
@@ -145,52 +145,76 @@ describe('stunden', function() {
 //  * Dates
 //  */
 // 
-// describe('dates', function () {
-//   it('tuesday at 9am', function () {
-//     var date = parse('tuesday at 9am', mon);
+// describe('datums', function () {
+//   it('dienstag um 9', function () {
+//     var date = parse('dienstag um 9', mon);
 //     assert('9:00:00' == t(date));
 //     assert('5/14/13' == d(date));
 //   });
 // 
-//   it('monday at 9am', function () {
-//     var date = parse('monday at 9am', mon);
+//   it('montag um 9', function () {
+//     var date = parse('montag um 9', mon);
 //     assert('9:00:00' == t(date));
 //     assert('5/13/13' == d(date));
 //   });
 // 
-//   it('Monday at 9am', function () {
-//     var date = parse('Monday at 9am', mon);
+//   it('Montag um 9', function () {
+//     var date = parse('Montag um 9', mon);
 //     assert('9:00:00' == t(date));
 //     assert('5/13/13' == d(date));
 //   });
 // 
-//   it('monday at 9', function () {
-//     var date = parse('monday at 9', mon);
+//   it('montag um 9 uhr', function () {
+//     var date = parse('montag um 9 uhr', mon);
 //     assert('9:00:00' == t(date));
 //     assert('5/13/13' == d(date));
 //   });
 // 
-//   it('monday at 21', function () {
-//     var date = parse('monday at 21', mon);
+//   it('montag um 21', function () {
+//     var date = parse('montag um 21', mon);
 //     assert('21:00:00' == t(date));
 //     assert('5/13/13' == d(date));
 //   });
 // 
-//   it('monday at 1:00am', function () {
-//     var date = parse('monday at 1:00am', mon);
+//   it('montag um 1:00', function () {
+//     var date = parse('montag um 1:00', mon);
 //     assert('1:00:00' == t(date));
 //     assert('5/20/13' == d(date));
 //   });
 // 
-//   it('next monday at 1:00am', function () {
-//     var date = parse('next monday at 1:00am', mon);
+//   it('nächsten montag um 1:00', function () {
+//     var date = parse('nächsten montag um 1:00', mon);
+//     assert('1:00:00' == t(date));
+//     assert('5/20/13' == d(date));
+//   });
+//   
+//   it('nächster montag um 1:00', function () {
+//     var date = parse('nächster montag um 1:00', mon);
+//     assert('1:00:00' == t(date));
+//     assert('5/20/13' == d(date));
+//   });
+//   
+//   it('naechster mo um 23:33', function () {
+//     var date = parse('naechster montag um 01:00', mon);
 //     assert('1:00:00' == t(date));
 //     assert('5/20/13' == d(date));
 //   });
 // 
-//   it('last monday at 1:00am', function () {
-//     var date = parse('last monday at 1:00am', mon);
+//   it('letzter montag um 1:00', function () {
+//     var date = parse('letzter montag um 1:00', mon);
 //     assert('1:00:00' == t(date));
+//     assert('5/6/13' == d(date));
+//   });
+//   
+//   it('letzter montag 1:00', function () {
+//     var date = parse('letzter montag 1:00', mon);
+//     assert('1:00:00' == t(date));
+//     assert('5/6/13' == d(date));
+//   });
+//   
+//   it('am letzten montag um 1:22 uhr', function () {
+//     var date = parse('letzter montag um 1:22', mon);
+//     assert('1:22:00' == t(date));
 //     assert('5/6/13' == d(date));
 //   });
 // });
@@ -199,37 +223,49 @@ describe('stunden', function() {
 //  * Tomorrow
 //  */
 // 
-// describe('tomorrow', function () {
-//   it('tomorrow at 3pm', function () {
-//     var date = parse('tomorrow at 3pm', mon);
+// describe('morgen', function () {
+//   it('morgen um 15:00', function () {
+//     var date = parse('morgen um 15:00', mon);
 //     assert('15:00:00' == t(date));
 //     assert('5/14/13' == d(date));
 //   });
-// });
-// 
-// /**
-//  * Yesterday
-//  */
-// 
-// describe('yesterday', function () {
-//   it('yesterday at 3pm', function () {
-//     var date = parse('yesterday at 3pm', mon);
-//     assert('15:00:00' == t(date));
-//     assert('5/12/13' == d(date));
-//   });
-// 
-//   it('yesterday at 15', function () {
-//     var date = parse('yesterday at 15', mon);
-//     assert('15:00:00' == t(date));
-//     assert('5/12/13' == d(date));
-//   });
-// 
-//   it('yesterday at 12:30am', function () {
-//     var date = parse('yesterday at 12:30am', mon);
-//     assert('0:30:00' == t(date));
-//     assert('5/12/13' == d(date));
+//   
+//   it('Morgen 15:00', function () {
+//     var date = parse('Morgen 16:22', mon);
+//     assert('16:22:00' == t(date));
+//     assert('5/14/13' == d(date));
 //   });
 // });
+
+/**
+ * Yesterday
+ */
+
+describe('gestern', function () {
+  it('gestern um 15:00', function () {
+    var date = parse('gestern um 15:00', mon);
+    assert('15:00:00' == t(date));
+    assert('5/12/13' == d(date));
+  });
+  
+  it('Gestern um 15:00', function () {
+    var date = parse('Gestern um 15:00', mon);
+    assert('15:00:00' == t(date));
+    assert('5/12/13' == d(date));
+  });
+
+  // it('Gestern um 15:00', function () {
+  //   var date = parse('Gestern um 15:00', mon);
+  //   assert('15:00:00' == t(date));
+  //   assert('5/12/13' == d(date));
+  // });
+  // 
+  // it('Gestern um 12:30am', function () {
+  //   var date = parse('Gestern um 12:30am', mon);
+  //   assert('0:30:00' == t(date));
+  //   assert('5/12/13' == d(date));
+  // });
+});
 // 
 // /**
 //  * Tonight
