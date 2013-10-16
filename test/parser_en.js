@@ -63,7 +63,7 @@ describe('hours', function() {
   });
 
   it('at 5am', function () {
-    var date = parse('5am', mon);
+    var date = parse('at 5am', mon);
     assert('5:00:00' == t(date));
     assert('5/13/13' == d(date));
   });
@@ -76,6 +76,12 @@ describe('hours', function() {
 
   it('at5', function () {
     var date = parse('at5', mon);
+    assert('5:00:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
+  
+  it('at 5 o\'clock', function () {
+    var date = parse('at 5 o\'clock', mon);
     assert('5:00:00' == t(date));
     assert('5/13/13' == d(date));
   });
