@@ -9,6 +9,7 @@
     "index.js",
     "lib/date.js",
     "lib/parser.js",
-    "lib/i18n/en.js"
+    "lib/i18n/en.js",
+    "lib/i18n/de.js"
   ]
 }
