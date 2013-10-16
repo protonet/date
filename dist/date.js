@@ -27,10 +27,14 @@ function require(path, parent, orig) {
   // perform real require()
   // by invoking the module's
   // registered function
-  if (!module.exports) {
-    module.exports = {};
-    module.client = module.component = true;
-    module.call(this, module.exports, require.relative(resolved), module);
+  if (!module._resolving && !module.exports) {
+    var mod = {};
+    mod.exports = {};
+    mod.client = mod.component = true;
+    module._resolving = true;
+    module.call(this, mod.exports, require.relative(resolved), mod);
+    delete module._resolving;
+    module.exports = mod.exports;
   }
 
   return module.exports;
@@ -196,154 +200,6 @@ require.relative = function(parent) {
 
   return localRequire;
 };
-require.register("visionmedia-debug/index.js", function(exports, require, module){
-if ('undefined' == typeof window) {
-  module.exports = require('./lib/debug');
-} else {
-  module.exports = require('./debug');
-}
-
-});
-require.register("visionmedia-debug/debug.js", function(exports, require, module){
-
-/**
- * Expose `debug()` as the module.
- */
-
-module.exports = debug;
-
-/**
- * Create a debugger with the given `name`.
- *
- * @param {String} name
- * @return {Type}
- * @api public
- */
-
-function debug(name) {
-  if (!debug.enabled(name)) return function(){};
-
-  return function(fmt){
-    fmt = coerce(fmt);
-
-    var curr = new Date;
-    var ms = curr - (debug[name] || curr);
-    debug[name] = curr;
-
-    fmt = name
-      + ' '
-      + fmt
-      + ' +' + debug.humanize(ms);
-
-    // This hackery is required for IE8
-    // where `console.log` doesn't have 'apply'
-    window.console
-      && console.log
-      && Function.prototype.apply.call(console.log, console, arguments);
-  }
-}
-
-/**
- * The currently active debug mode names.
- */
-
-debug.names = [];
-debug.skips = [];
-
-/**
- * Enables a debug mode by name. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} name
- * @api public
- */
-
-debug.enable = function(name) {
-  try {
-    localStorage.debug = name;
-  } catch(e){}
-
-  var split = (name || '').split(/[\s,]+/)
-    , len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    name = split[i].replace('*', '.*?');
-    if (name[0] === '-') {
-      debug.skips.push(new RegExp('^' + name.substr(1) + '$'));
-    }
-    else {
-      debug.names.push(new RegExp('^' + name + '$'));
-    }
-  }
-};
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-debug.disable = function(){
-  debug.enable('');
-};
-
-/**
- * Humanize the given `ms`.
- *
- * @param {Number} m
- * @return {String}
- * @api private
- */
-
-debug.humanize = function(ms) {
-  var sec = 1000
-    , min = 60 * 1000
-    , hour = 60 * min;
-
-  if (ms >= hour) return (ms / hour).toFixed(1) + 'h';
-  if (ms >= min) return (ms / min).toFixed(1) + 'm';
-  if (ms >= sec) return (ms / sec | 0) + 's';
-  return ms + 'ms';
-};
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-debug.enabled = function(name) {
-  for (var i = 0, len = debug.skips.length; i < len; i++) {
-    if (debug.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (var i = 0, len = debug.names.length; i < len; i++) {
-    if (debug.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-/**
- * Coerce `val`.
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-
-// persist
-
-try {
-  if (window.localStorage) debug.enable(localStorage.debug);
-} catch(e){}
-
-});
 require.register("date/index.js", function(exports, require, module){
 /**
  * Expose `Date`
@@ -353,12 +209,6 @@ module.exports = require('./lib/parser');
 
 });
 require.register("date/lib/date.js", function(exports, require, module){
-/**
- * Module Dependencies
- */
-
-var debug = require('debug')('date:date');
-
 /**
  * Time constants
  */
@@ -562,18 +412,6 @@ date.prototype.time = function(h, m, s, meridiem) {
 };
 
 /**
- * Dynamically create day functions (sunday(n), monday(n), etc.)
- */
-
-var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-days.forEach(function(day, i) {
-  date.prototype[days[i]] = function(n) {
-    this._changed['days'] = true;
-    this.updateDay(i, n);
-  };
-});
-
-/**
  * go to day of week
  *
  * @param {Number} day
@@ -582,6 +420,7 @@ days.forEach(function(day, i) {
  */
 
 date.prototype.updateDay = function(d, n) {
+  this._changed['days'] = true;
   n = +(n || 1);
   var diff = (d - this.date.getDay() + 7) % 7;
   if (n > 0) --n;
@@ -621,29 +460,13 @@ require.register("date/lib/parser.js", function(exports, require, module){
  */
 
 var date = require('./date');
-var debug = require('debug')('date:parser');
 
-/**
- * Days
- */
+var dateLocales = {
+  en: require('./i18n/en.js'),
+  de: require('./i18n/de.js')
+};
 
-var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-var months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september',
-              'october', 'november', 'december' ]
-
-/**
- * Regexs
- */
-
-// 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
-var rMeridiem = /^(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/;
-var rHourMinute = /^(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?/;
-var rAtHour = /^at\s?(\d{1,2})$/;
-var rDays = /\b(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/;
-var rMonths = /^((\d{1,2})(st|nd|rd|th))\sof\s(january|februay|march|april|may|june|july|august|september|october|november|december)/;
-var rPast = /\b(last|yesterday|ago)\b/;
 var rDayMod = /\b(morning|noon|afternoon|night|evening|midnight)\b/;
-var rAgo = /^(\d*)\s?\b(second|minute|hour|day|week|month|year)[s]?\b\s?ago$/;
 
 /**
  * Expose `parser`
@@ -659,9 +482,11 @@ module.exports = parser;
  * @api publics
  */
 
-function parser(str, offset) {
-  if(!(this instanceof parser)) return new parser(str, offset);
+function parser(str, offset, lang) {
+  if(!(this instanceof parser)) return new parser(str, offset, lang);
   if(typeof offset == 'string') offset = parser(offset);
+  lang = lang || "en";
+  this.locales = dateLocales[lang];
   var d = offset || new Date;
   this.date = new date(d);
   this.original = str;
@@ -669,11 +494,10 @@ function parser(str, offset) {
   this.stash = [];
   this.tokens = [];
   while (this.advance() !== 'eos');
-  debug('tokens %j', this.tokens)
   this.nextTime(d);
   if (this.date.date == d) throw new Error('Invalid date');
   return this.date.date;
-};
+}
 
 /**
  * Advance a token
@@ -699,6 +523,7 @@ parser.prototype.advance = function() {
     || this.tonight()
     || this.meridiem()
     || this.hourminute()
+    || this.houroclock()
     || this.athour()
     || this.week()
     || this.month()
@@ -710,7 +535,7 @@ parser.prototype.advance = function() {
     || this.number()
     || this.string()
     || this.other();
-
+  
   this.tokens.push(tok);
   return tok;
 };
@@ -805,7 +630,7 @@ parser.prototype.space = function() {
 
 parser.prototype.second = function() {
   var captures;
-  if (captures = /^s(ec|econd)?s?/.exec(this.str)) {
+  if (captures = this.locales.words.rSeconds.exec(this.str)) {
     this.skip(captures);
     return 'second';
   }
@@ -817,7 +642,7 @@ parser.prototype.second = function() {
 
 parser.prototype.minute = function() {
   var captures;
-  if (captures = /^m(in|inute)?s?/.exec(this.str)) {
+  if (captures = this.locales.words.rMinutes.exec(this.str)) {
     this.skip(captures);
     return 'minute';
   }
@@ -829,7 +654,7 @@ parser.prototype.minute = function() {
 
 parser.prototype.hour = function() {
   var captures;
-  if (captures = /^h(r|our)s?/.exec(this.str)) {
+  if (captures = this.locales.words.rHours.exec(this.str)) {
     this.skip(captures);
     return 'hour';
   }
@@ -841,23 +666,24 @@ parser.prototype.hour = function() {
 
 parser.prototype.day = function() {
   var captures;
-  if (captures = /^d(ay)?s?/.exec(this.str)) {
+  if (captures = this.locales.words.rDays.exec(this.str)) {
     this.skip(captures);
     return 'day';
   }
 };
 
+
 /**
  * Day by name
  */
-
 parser.prototype.dayByName = function() {
   var captures;
-  var r = new RegExp('^' + rDays.source);
+  var r = new RegExp('^' + this.locales.rDays.source);
   if (captures = r.exec(this.str)) {
     var day = captures[1];
+    var index = this.locales.days.indexOf(day);
     this.skip(captures);
-    this.date[day](1);
+    this.date.updateDay(index, 1);
     return captures[1];
   }
 };
@@ -869,10 +695,10 @@ parser.prototype.dayByName = function() {
 
 parser.prototype.monthByName = function() {
   var captures;
-  if (captures = rMonths.exec(this.str)) {
-    var day = captures[2]
+  if (captures = this.locales.rMonths.exec(this.str)) {
+    var day = captures[2];
     var month = captures[4];
-    this.date.date.setMonth((months.indexOf(month)));
+    this.date.date.setMonth((this.locales.months.indexOf(month)));
     if (day) this.date.date.setDate(parseInt(day) - 1);
     this.skip(captures);
     return captures[0];
@@ -882,10 +708,13 @@ parser.prototype.monthByName = function() {
 
 parser.prototype.timeAgo = function() {
   var captures;
-  if (captures = rAgo.exec(this.str)) {
+  if (captures = this.locales.rAgo.exec(this.str)) {
     var num = captures[1];
     var mod = captures[2];
-    this.date[mod](-num);
+    
+    var methodName = this.locales.agoMapping[mod];
+    
+    this.date[methodName](-num);
     this.skip(captures);
     return 'timeAgo';
   }
@@ -897,7 +726,7 @@ parser.prototype.timeAgo = function() {
 
 parser.prototype.week = function() {
   var captures;
-  if (captures = /^w(k|eek)s?/.exec(this.str)) {
+  if (captures = this.locales.words.rWeeks.exec(this.str)) {
     this.skip(captures);
     return 'week';
   }
@@ -909,7 +738,7 @@ parser.prototype.week = function() {
 
 parser.prototype.month = function() {
   var captures;
-  if (captures = /^mon(th)?(es|s)?\b/.exec(this.str)) {
+  if (captures = this.locales.words.rMonths.exec(this.str)) {
     this.skip(captures);
     return 'month';
   }
@@ -922,7 +751,7 @@ parser.prototype.month = function() {
 
 parser.prototype.year = function() {
   var captures;
-  if (captures = /^y(r|ear)s?/.exec(this.str)) {
+  if (captures = this.locales.words.rYears.exec(this.str)) {
     this.skip(captures);
     return 'year';
   }
@@ -934,7 +763,7 @@ parser.prototype.year = function() {
 
 parser.prototype.meridiem = function() {
   var captures;
-  if (captures = rMeridiem.exec(this.str)) {
+  if (captures = this.locales.rMeridiem.exec(this.str)) {
     this.skip(captures);
     this.time(captures[1], captures[3], captures[5], captures[6]);
     return 'meridiem';
@@ -947,10 +776,23 @@ parser.prototype.meridiem = function() {
 
 parser.prototype.hourminute = function() {
   var captures;
-  if (captures = rHourMinute.exec(this.str)) {
+  if (captures = this.locales.rHourMinute.exec(this.str)) {
     this.skip(captures);
     this.time(captures[1], captures[3], captures[5]);
     return 'hourminute';
+  }
+};
+
+/**
+ * Hour (ex. 5 o'clock)
+ */
+
+parser.prototype.houroclock = function() {
+  var captures;
+  if (captures = this.locales.rHourOclock.exec(this.str)) {
+    this.skip(captures);
+    this.time(captures[1], 0, 0);
+    return 'oclock';
   }
 };
 
@@ -960,7 +802,7 @@ parser.prototype.hourminute = function() {
 
 parser.prototype.athour = function() {
   var captures;
-  if (captures = rAtHour.exec(this.str)) {
+  if (captures = this.locales.rAtHour.exec(this.str)) {
     this.skip(captures);
     this.time(captures[1], 0, 0, this._meridiem);
     this._meridiem = null;
@@ -975,7 +817,8 @@ parser.prototype.athour = function() {
 parser.prototype.time = function(h, m, s, meridiem) {
   var d = this.date;
   var before = d.clone();
-
+  meridiem = meridiem || this._meridiem;
+  
   if (meridiem) {
     // convert to 24 hour
     h = ('pm' == meridiem && 12 > h) ? +h + 12 : h; // 6pm => 18
@@ -995,13 +838,16 @@ parser.prototype.time = function(h, m, s, meridiem) {
 
 parser.prototype.nextTime = function(before) {
   var d = this.date;
-  var orig = this.original;
-
-  if (before <= d.date || rPast.test(orig)) return this;
-
+  var orig = this.original.toLowerCase();
+  if (before <= d.date || this.locales.rPast.test(orig)) {
+    return this;
+  }
   // If time is in the past, we need to guess at the next time
-  if (rDays.test(orig)) d.day(7);
-  else if ((before - d.date) / 1000 > 60) d.day(1);
+  if (this.locales.rDays.test(orig)) {
+    d.day(7);
+  } else if ((before - d.date) / 1000 > 60) {
+    d.day(1);
+  }
 
   return this;
 };
@@ -1012,7 +858,7 @@ parser.prototype.nextTime = function(before) {
 
 parser.prototype.yesterday = function() {
   var captures;
-  if (captures = /^(yes(terday)?)/.exec(this.str)) {
+  if (captures = this.locales.words.rYesterday.exec(this.str)) {
     this.skip(captures);
     this.date.day(-1);
     return 'yesterday';
@@ -1025,7 +871,7 @@ parser.prototype.yesterday = function() {
 
 parser.prototype.tomorrow = function() {
   var captures;
-  if (captures = /^tom(orrow)?/.exec(this.str)) {
+  if (captures = this.locales.words.rTomorrow.exec(this.str)) {
     this.skip(captures);
     this.date.day(1);
     return 'tomorrow';
@@ -1038,7 +884,7 @@ parser.prototype.tomorrow = function() {
 
 parser.prototype.noon = function() {
   var captures;
-  if (captures = /^noon\b/.exec(this.str)) {
+  if (captures = this.locales.words.rNoon.exec(this.str)) {
     this.skip(captures);
     var before = this.date.clone();
     this.date.date.setHours(12, 0, 0);
@@ -1052,7 +898,7 @@ parser.prototype.noon = function() {
 
 parser.prototype.midnight = function() {
   var captures;
-  if (captures = /^midnight\b/.exec(this.str)) {
+  if (captures = this.locales.words.rMidnight.exec(this.str)) {
     this.skip(captures);
     var before = this.date.clone();
     this.date.date.setHours(0, 0, 0);
@@ -1066,7 +912,7 @@ parser.prototype.midnight = function() {
 
 parser.prototype.night = function() {
   var captures;
-  if (captures = /^night\b/.exec(this.str)) {
+  if (captures = this.locales.words.rNight.exec(this.str)) {
     this.skip(captures);
     this._meridiem = 'pm';
     var before = this.date.clone();
@@ -1081,7 +927,7 @@ parser.prototype.night = function() {
 
 parser.prototype.evening = function() {
   var captures;
-  if (captures = /^evening\b/.exec(this.str)) {
+  if (captures = this.locales.words.rEvening.exec(this.str)) {
     this.skip(captures);
     this._meridiem = 'pm';
     var before = this.date.clone();
@@ -1096,7 +942,7 @@ parser.prototype.evening = function() {
 
 parser.prototype.afternoon = function() {
   var captures;
-  if (captures = /^afternoon\b/.exec(this.str)) {
+  if (captures = this.locales.words.rAfternoon.exec(this.str)) {
     this.skip(captures);
     this._meridiem = 'pm';
     var before = this.date.clone();
@@ -1115,7 +961,7 @@ parser.prototype.afternoon = function() {
 
 parser.prototype.morning = function() {
   var captures;
-  if (captures = /^morning\b/.exec(this.str)) {
+  if (captures = this.locales.words.rMorning.exec(this.str)) {
     this.skip(captures);
     this._meridiem = 'am';
     var before = this.date.clone();
@@ -1130,7 +976,7 @@ parser.prototype.morning = function() {
 
 parser.prototype.tonight = function() {
   var captures;
-  if (captures = /^tonight\b/.exec(this.str)) {
+  if (captures = this.locales.words.rTonight.exec(this.str)) {
     this.skip(captures);
     this._meridiem = 'pm';
     return 'tonight';
@@ -1143,17 +989,22 @@ parser.prototype.tonight = function() {
 
 parser.prototype._next = function() {
   var captures;
-  if (captures = /^next/.exec(this.str)) {
+  if (captures = this.locales.words.rNext.exec(this.str)) {
     this.skip(captures);
     var d = new Date(this.date.date);
     var mod = this.peek();
-
+    var dayIndex = this.locales.days.indexOf(mod);
     // If we have a defined modifier, then update
     if (this.date[mod]) {
       this.next();
       // slight hack to modify already modified
       this.date = date(d);
       this.date[mod](1);
+    } else if (dayIndex !== -1) {
+      this.next();
+      // slight hack to modify already modified
+      this.date = date(d);
+      this.date.updateDay(dayIndex, 1);
     } else if (rDayMod.test(mod)) {
       this.date.day(1);
     }
@@ -1168,17 +1019,22 @@ parser.prototype._next = function() {
 
 parser.prototype.last = function() {
   var captures;
-  if (captures = /^last/.exec(this.str)) {
+  if (captures = this.locales.words.rLast.exec(this.str)) {
     this.skip(captures);
     var d = new Date(this.date.date);
     var mod = this.peek();
-
+    var dayIndex = this.locales.days.indexOf(mod);
     // If we have a defined modifier, then update
     if (this.date[mod]) {
       this.next();
       // slight hack to modify already modified
       this.date = date(d);
       this.date[mod](-1);
+    } else if (dayIndex !== -1) {
+      this.next();
+      // slight hack to modify already modified
+      this.date = date(d);
+      this.date.updateDay(dayIndex, -1);
     } else if (rDayMod.test(mod)) {
       this.date.day(-1);
     }
@@ -1193,7 +1049,7 @@ parser.prototype.last = function() {
 
 parser.prototype.ago = function() {
   var captures;
-  if (captures = /^ago\b/.exec(this.str)) {
+  if (captures = this.locales.words.rAgo.exec(this.str)) {
     this.skip(captures);
     return 'ago';
   }
@@ -1209,7 +1065,6 @@ parser.prototype.number = function() {
     var n = captures[1];
     this.skip(captures);
     var mod = this.peek();
-
     // If we have a defined modifier, then update
     if (this.date[mod]) {
       if ('ago' == this.peek()) n = -n;
@@ -1218,7 +1073,7 @@ parser.prototype.number = function() {
       // when we don't have meridiem, possibly use context to guess
       this.time(n, 0, 0, this._meridiem);
       this._meridiem = null;
-    } else if (this.original.indexOf('at') > -1 ) {
+    } else if (this.original.toLowerCase().match(this.locales.words.rAt)) {
       this.time(n, 0, 0, this._meridiem);
       this._meridiem = null;
     }
@@ -1252,10 +1107,61 @@ parser.prototype.other = function() {
 };
 
 });
-require.alias("visionmedia-debug/index.js", "date/deps/debug/index.js");
-require.alias("visionmedia-debug/debug.js", "date/deps/debug/debug.js");
-require.alias("visionmedia-debug/index.js", "debug/index.js");
+require.register("date/lib/i18n/en.js", function(exports, require, module){
+var date18n = {
+  days:           ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
+  months:         ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
+  
+  // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
+  rMeridiem:      /^(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/,
+  rHourMinute:    /^(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?/,
+  rHourOclock:    /^(\d+)\s*o\'?clock\b/,
+  rAtHour:        /^at\s?(\d{1,2})$/,
+  rDays:          /\b(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/,
+  rMonths:        /^((\d{1,2})(st|nd|rd|th))\sof\s(january|february|march|april|may|june|july|august|september|october|november|december)/,
+  rPast:          /\b(last|yesterday|ago)\b/,
+  rAgo:           /^(\d*)\s?\b(second|sec|minute|min|hour|h|day|week|month|year)[s]?\s+ago\b/,
+  
+  agoMapping: {
+    "second": "second",
+    "sec":    "second",
+    "minute": "minute",
+    "min":    "minute",
+    "hour":   "hour",
+    "h":      "hour",
+    "day":    "day",
+    "week":   "week",
+    "month":  "month",
+    "year":   "year"
+  },
+  
+  words: {
+    rSeconds:       /^s(ec|econd)?s?/,
+    rMinutes:       /^m(in|inute)?s?/,
+    rHours:         /^h(r|our)s?/,
+    rDays:          /^d(ay)?s?/,
+    rWeeks:         /^w(k|eek)s?/,
+    rMonths:        /^mon(th)?(es|s)?\b/,
+    rYears:         /^y(r|ear)s?/,
+    rYesterday:     /^(yes(terday)?)/,
+    rTomorrow:      /^tom(orrow)?/,
+    rNoon:          /^noon\b/,
+    rMidnight:      /^midnight\b/,
+    rNight:         /^night\b/,
+    rEvening:       /^evening\b/,
+    rAfternoon:     /^afternoon\b/,
+    rMorning:       /^morning\b/,
+    rTonight:       /^tonight\b/,
+    rNext:          /^next/,
+    rLast:          /^last/,
+    rAgo:           /^ago\b/,
+    rAt:            /\bat\s/
+  }
+  
+};
 
+module.exports = date18n;
+});
 require.alias("date/index.js", "date/index.js");if (typeof exports == "object") {
   module.exports = require("date");
 } else if (typeof define == "function" && define.amd) {
