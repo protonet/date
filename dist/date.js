@@ -257,19 +257,21 @@ date.prototype.clone = function() {
  */
 
 date.prototype.changed = function(str) {
-  if (!str) {
-    for (var i in this._changed) {
-      if (this._changed.hasOwnProperty(i)) {
-        return true;
-      }
-    }
-  }
-  
   if (this._changed[str] === undefined) {
     return false;
   }
-  
   return this._changed[str];
+};
+
+
+date.prototype.matches = function() {
+  var matches = 0;
+  for (var i in this._changed) {
+    if (this._changed.hasOwnProperty(i)) {
+      matches++;
+    }
+  }
+  return matches;
 };
 
 /**
@@ -509,7 +511,7 @@ function parser(str, offset, lang) {
   
   this.nextTime(d);
   
-  return { date: this.date.date, changed: this.date.changed() };
+  return { date: this.date.date, matches: this.date.matches() };
 }
 
 /**

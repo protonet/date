@@ -752,24 +752,6 @@ describe('support "ago" modifier (fixes: #20)', function (){
 
 
 /**
- * Changed
- */
-
-describe('changed', function (){
-  it('should mark date as changed when different from offset', function () {
-    var date = parse('2nd of January 12:30');
-    assert(date.changed);
-  });
-  
-  it('should not mark date as changed no date has been found', function () {
-    var date = parse('foo');
-    assert(!date.changed);
-  });
-});
-
-
-
-/**
  * Time helper function
  */
 
