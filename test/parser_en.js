@@ -79,7 +79,7 @@ describe('hours', function() {
     assert('5:00:00' == t(date));
     assert('5/13/13' == d(date));
   });
-  
+
   it('at 5 o\'clock', function () {
     var date = parse('at 5 o\'clock', mon);
     assert('5:00:00' == t(date));
@@ -241,19 +241,19 @@ describe('tonight', function () {
     assert('17:00:00' == t(date));
     assert('5/13/13' == d(date));
   });
-  
+
   it('tonight at 5', function () {
     var date = parse('tonight at 5', mon);
     assert('17:00:00' == t(date));
     assert('5/13/13' == d(date));
   });
-  
+
   it('tonight at 5:30', function () {
     var date = parse('tonight at 5:30', mon);
     assert('17:30:00' == t(date));
     assert('5/13/13' == d(date));
   });
-  
+
   it('tonight 5:30', function () {
     var date = parse('tonight 5:30', mon);
     assert('17:30:00' == t(date));
@@ -327,13 +327,13 @@ describe('weeks', function () {
     assert('1:30:00' == t(date));
     assert('5/21/13' == d(date));
   });
-  
+
   it('next week tuesday at 4:30pm', function () {
     var date = parse('next week tuesday at 4:30pm', mon);
     assert('16:30:00' == t(date));
     assert('5/21/13' == d(date));
   });
-  
+
   it('2 weeks from wednesday', function () {
     var date = parse('2 weeks from wednesday', mon);
     assert('1:30:00' == t(date));
@@ -529,19 +529,19 @@ describe('year', function() {
     assert('1:30:00' == t(date));
     assert('5/13/12' == d(date));
   });
-  
+
   it('2 years from yesterday at 5pm', function () {
     var date = parse('2 years from yesterday at 5pm', mon);
     assert('17:00:00' == t(date));
     assert('5/12/15' == d(date));
   });
-  
+
   it('2 years ago', function() {
     var date = parse('2 years ago', mon);
     assert('1:30:00' == t(date));
     assert('5/13/11' == d(date));
   })
-  
+
   it('2 years ago tomorrow', function() {
     var date = parse('2 years ago tomorrow', mon);
     assert('1:30:00' == t(date));
@@ -614,12 +614,13 @@ describe('other inputs', function () {
 
   it('invalid', function() {
     var date = parse('invalid', mon);
-    assert(d(mon) == d(date));
+    assert(d({ date: mon }) == d(date));
   });
 
   it('empty', function() {
     var date = parse('', mon);
-    assert(d(mon) == d(date));
+    assert('1:30:00' == t(date));
+    assert('5/13/13' == d(date));
   });
 });
 
@@ -643,20 +644,19 @@ describe('bug fixes', function () {
   })
 });
 
-/**
- * If context is a string parse it as date
- */
-
-describe('parse context if its a string (fixes: #38)', function () {
-  it('string context', function () {
-    var today = new Date();
-    today.setDate(today.getDate() - 1);
-    var date = parse('today at 11am', 'yesterday at 12:30am');
-
-    assert(d(date) == d(today));
-    assert('11:00:00' == t(date));
-  });
-});
+// /**
+//  * If context is a string parse it as date
+//  */
+//
+// describe('parse context if its a string (fixes: #38)', function () {
+//   it('string context', function () {
+//     var today = new Date();
+//     today.setDate(today.getDate() - 1);
+//     var date = parse('today at 11am', 'yesterday at 12:30am');
+//     assert(d(date) == d({ date: today }));
+//     assert('11:00:00' == t(date));
+//   });
+// });
 
 
 /**
@@ -750,12 +750,31 @@ describe('support "ago" modifier (fixes: #20)', function (){
 });
 
 
+
+/**
+ * Changed
+ */
+
+describe('changed', function (){
+  it('should mark date as changed when different from offset', function () {
+    var date = parse('2nd of January 12:30');
+    assert(date.changed);
+  });
+  
+  it('should not mark date as changed no date has been found', function () {
+    var date = parse('foo');
+    assert(!date.changed);
+  });
+});
+
+
+
 /**
  * Time helper function
  */
 
-function t(date) {
-  var t = date.toTimeString().split(' ')[0];
+function t(result) {
+  var t = result.date.toTimeString().split(' ')[0];
   t = ('0' == t[0]) ? t.slice(1) : t;
   return t;
 }
@@ -764,11 +783,10 @@ function t(date) {
  * Date helper function
  */
 
-function d(date) {
-  var d = date.toString();
-  var month = date.getMonth() + 1;
-  var day = date.getDate();
-  var year = '' + date.getFullYear();
+function d(result) {
+  var d = result.date.toString();
+  var month = result.date.getMonth() + 1;
+  var day = result.date.getDate();
+  var year = '' + result.date.getFullYear();
   return [month, day, year.slice(2)].join('/');
 }
-

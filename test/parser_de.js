@@ -760,12 +760,14 @@ describe('other inputs', function () {
 
   it('invalid', function() {
     var date = parse('invalid', mon, "de");
-    assert(d(mon) == d(date));
+    assert('1:30:00' == t(date));
+    assert('5/13/13' == d(date));
   });
   
   it('empty', function() {
     var date = parse('', mon, "de");
-    assert(d(mon) == d(date));
+    assert('1:30:00' == t(date));
+    assert('5/13/13' == d(date));
   });
 });
 
@@ -918,8 +920,8 @@ describe('support "ago" modifier (fixes: #20)', function (){
  * Time helper function
  */
 
-function t(date) {
-  var t = date.toTimeString().split(' ')[0];
+function t(result) {
+  var t = result.date.toTimeString().split(' ')[0];
   t = ('0' == t[0]) ? t.slice(1) : t;
   return t;
 }
@@ -928,11 +930,10 @@ function t(date) {
  * Date helper function
  */
 
-function d(date) {
-  var d = date.toString();
-  var month = date.getMonth() + 1;
-  var day = date.getDate();
-  var year = '' + date.getFullYear();
+function d(result) {
+  var d = result.date.toString();
+  var month = result.date.getMonth() + 1;
+  var day = result.date.getDate();
+  var year = '' + result.date.getFullYear();
   return [month, day, year.slice(2)].join('/');
 }
-

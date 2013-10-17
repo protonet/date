@@ -247,7 +247,7 @@ function date(offset) {
 
 date.prototype.clone = function() {
   return new Date(this.date);
-}
+};
 
 /**
  * Has changed
@@ -257,7 +257,18 @@ date.prototype.clone = function() {
  */
 
 date.prototype.changed = function(str) {
-  if (this._changed[str] === undefined) return false;
+  if (!str) {
+    for (var i in this._changed) {
+      if (this._changed.hasOwnProperty(i)) {
+        return true;
+      }
+    }
+  }
+  
+  if (this._changed[str] === undefined) {
+    return false;
+  }
+  
   return this._changed[str];
 };
 
@@ -493,10 +504,12 @@ function parser(str, offset, lang) {
   this.str = str.toLowerCase();
   this.stash = [];
   this.tokens = [];
+  
   while (this.advance() !== 'eos');
+  
   this.nextTime(d);
-  if (this.date.date == d) throw new Error('Invalid date');
-  return this.date.date;
+  
+  return { date: this.date.date, changed: this.date.changed() };
 }
 
 /**
