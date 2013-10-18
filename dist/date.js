@@ -361,6 +361,8 @@ date.prototype.month = function(n) {
   // Handle dates with less days
   var dim = this.daysInMonth(month)
   d.setDate(Math.min(dim, day));
+  this._changed['months'] = true;
+  this._changed['days'] = true;
   return this;
 };
 
@@ -714,7 +716,11 @@ parser.prototype.monthByName = function() {
     var day = captures[2];
     var month = captures[4];
     this.date.date.setMonth((this.locales.months.indexOf(month)));
-    if (day) this.date.date.setDate(parseInt(day));
+    this.date._changed['month'] = true;
+    if (day) {
+      this.date.date.setDate(parseInt(day));
+      this.date._changed['days'] = true;
+    }
     this.skip(captures);
     return captures[0];
   }
