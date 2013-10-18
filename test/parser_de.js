@@ -842,6 +842,12 @@ describe('months (fixes: #10)', function (){
     assert('17:00:00' == t(date));
     assert('12/20/13' == d(date));
   });
+  
+  it('24. Dezember', function(){
+    var date = parse('24. Dezember', after, "de");
+    assert('13:30:00' == t(date));
+    assert('12/24/13' == d(date));
+  });
 });
 
 /**
