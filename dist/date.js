@@ -714,7 +714,7 @@ parser.prototype.monthByName = function() {
     var day = captures[2];
     var month = captures[4];
     this.date.date.setMonth((this.locales.months.indexOf(month)));
-    if (day) this.date.date.setDate(parseInt(day) - 1);
+    if (day) this.date.date.setDate(parseInt(day));
     this.skip(captures);
     return captures[0];
   }
@@ -857,9 +857,12 @@ parser.prototype.nextTime = function(before) {
   if (before <= d.date || this.locales.rPast.test(orig)) {
     return this;
   }
+  
   // If time is in the past, we need to guess at the next time
   if (this.locales.rDays.test(orig)) {
     d.day(7);
+  } else if (d.date.getMonth() < before.getMonth()) {
+    d.year(1);
   } else if ((before - d.date) / 1000 > 60) {
     d.day(1);
   }
