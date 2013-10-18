@@ -816,26 +816,31 @@ describe('months (fixes: #10)', function (){
   it('2. Januar', function () {
     var date = parse('2. Januar, 12:30', after, "de");
     assert('12:30:00' == t(date));
-    assert('1/2/13' == d(date));
+    assert('1/2/14' == d(date));
   });
-
+  
   it('1. März', function () {
     var date = parse('1. März', after, "de");
     assert('13:30:00' == t(date));
-    assert('3/1/13' == d(date));
+    assert('3/1/14' == d(date));
   });
-
+  
   it('31. September 4 uhr', function () {
     var date = parse('31. September 4 uhr', after, "de");
     assert('4:00:00' == t(date));
-    assert('9/31/13' != d(date));
-    assert('9/30/13' == d(date));
+    assert('10/1/13' == d(date));
   });
-
+  
   it('1. Januar 4:00am', function(){
     var date = parse('1. Januar 4:00am', after, "de");
     assert('4:00:00' == t(date));
-    assert('1/1/13' == d(date));
+    assert('1/1/14' == d(date));
+  });
+  
+  it('Am 20. Dezember um 17 uhr', function(){
+    var date = parse('Am 20. Dezember um 17 uhr', after, "de");
+    assert('17:00:00' == t(date));
+    assert('12/20/13' == d(date));
   });
 });
 
