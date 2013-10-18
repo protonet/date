@@ -712,9 +712,17 @@ parser.prototype.dayByName = function() {
 
 parser.prototype.monthByName = function() {
   var captures;
+  var day;
+  var month;
   if (captures = this.locales.rMonths.exec(this.str)) {
-    var day = captures[2];
-    var month = captures[4];
+    day = captures[2];
+    month = captures[4];
+  } else if (this.locales.rMonths2 && (captures = this.locales.rMonths2.exec(this.str))) {
+    day = captures[3];
+    month = captures[1];
+  }
+  
+  if (day && month) {
     this.date.date.setMonth((this.locales.months.indexOf(month)));
     this.date._changed['month'] = true;
     if (day) {
@@ -1142,7 +1150,8 @@ var date18n = {
   rHourOclock:    /^(\d+)\s*o\'?clock\b/,
   rAtHour:        /^at\s?(\d{1,2})$/,
   rDays:          /\b(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/,
-  rMonths:        /^((\d{1,2})(st|nd|rd|th))\sof\s(january|february|march|april|may|june|july|august|september|october|november|december)/,
+  rMonths:        /^((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)/,
+  rMonths2:       /^(january|february|march|april|may|june|july|august|september|october|november|december)\s+((\d{1,2})(st|nd|rd|th))/,
   rPast:          /\b(last|yesterday|ago)\b/,
   rAgo:           /^(\d*)\s?\b(second|sec|minute|min|hour|h|day|week|month|year)[s]?\s+ago\b/,
   
@@ -1197,7 +1206,7 @@ var date18n = {
   rHourOclock:    /^(\d+)\s*uhr\b/,
   rAtHour:        /^um\s?(\d{1,2})$/,
   rDays:          /\b(sonntag|montag|dienstag|mittwoch|donnerstag|freitag|samstag)s?\b/,
-  rMonths:        /^((\d{1,2})(\.))\s(januar|februar|m(ä|ae)rz|april|mai|juni|juli|august|september|oktober|november|dezember)/,
+  rMonths:        /^((\d{1,2})(\.))\s+(januar|februar|m(ä|ae)rz|april|mai|juni|juli|august|september|oktober|november|dezember)/,
   rPast:          /\b(letzte(n|r|s)?|gestern|vor)\b/,
   rAgo:           /^vor\s+(\d*)\s?\b(sekunde|sek|min|minute|stunde|std|tag|woche|monat|jahr)(n|en)?\b/,
   

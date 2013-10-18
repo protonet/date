@@ -695,6 +695,18 @@ describe('months (fixes: #10)', function (){
     assert('17:00:00' == t(date));
     assert('12/20/13' == d(date));
   });
+  
+  it('christmas on 24TH   december', function(){
+    var date = parse('christmas on 24TH   december', after);
+    assert('13:30:00' == t(date));
+    assert('12/24/13' == d(date));
+  });
+  
+  it('december 23rd', function(){
+    var date = parse('december   23rd', after);
+    assert('13:30:00' == t(date));
+    assert('12/23/13' == d(date));
+  });
 });
 
 /**
