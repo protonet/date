@@ -1,4 +1,4 @@
-# date [![Build Status](https://secure.travis-ci.org/MatthewMueller/date.png?branch=master)](http://travis-ci.org/MatthewMueller/date)
+# date [![Build Status](https://secure.travis-ci.org/protonet/date.png?branch=master)](http://travis-ci.org/protonet/date)
 
 Date is an english language date parser for node.js and the browser. For examples and demos, see: [http://matthewmueller.github.io/date/](http://matthewmueller.github.io/date/)
 
@@ -45,6 +45,7 @@ date('tomorrow afternoon')
 date('this morning at 9')
 date('2 years from yesterday at 5pm')
 date('last month')
+date('next tuesday at 5 o'clock')
 date('tomorrow afternoon at 4:30pm 1 month from now')
 
 date('at 12:30')
@@ -65,23 +66,6 @@ To run the tests, you'll need node.js:
 
     npm install
     make test
-
-## Contributors
-
-```
-project  : date
-repo age : 4 months
-active   : 20 days
-commits  : 50
-files    : 13
-authors  :
-  25  Matt Mueller            50.0%
-  10  Bulkan Evcimen          20.0%
-   9  Matthew Mueller         18.0%
-   3  Eero Norri              6.0%
-   2  thomas                  4.0%
-   1  Jimmy Gaussen           2.0%
-```
 
 ## License
 
