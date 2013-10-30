@@ -504,16 +504,19 @@ function parser(str, offset, lang) {
   this.locales = dateLocales[lang];
   var d = offset || new Date;
   this.date = new date(d);
-  this.original = str;
-  this.str = str.toLowerCase();
+  this.str = str;
+  this.oldStr = str;
   this.stash = [];
   this.tokens = [];
+  this._index = 0;
   
-  while (this.advance() !== 'eos');
+  while (this.advance().type !== 'eos');
   
   this.nextTime(d);
   
-  return { date: this.date.date, matches: this.date.matches() };
+  this.newStr = this.getNewStr();
+  
+  return { date: this.date.date, matches: this.date.matches(), newStr: this.newStr };
 }
 
 /**
@@ -521,6 +524,8 @@ function parser(str, offset, lang) {
  */
 
 parser.prototype.advance = function() {
+  var index = this._index++;
+  
   var tok = this.eos()
     || this.space()
     || this._next()
@@ -530,6 +535,7 @@ parser.prototype.advance = function() {
     || this.timeAgo()
     || this.ago()
     || this.yesterday()
+    || this.dayAfterTomorrow()
     || this.tomorrow()
     || this.noon()
     || this.midnight()
@@ -540,7 +546,6 @@ parser.prototype.advance = function() {
     || this.tonight()
     || this.meridiem()
     || this.hourminute()
-    || this.houroclock()
     || this.athour()
     || this.week()
     || this.month()
@@ -553,9 +558,43 @@ parser.prototype.advance = function() {
     || this.string()
     || this.other();
   
-  this.tokens.push(tok);
+  this.tokens[index] = tok;
   return tok;
 };
+
+
+parser.prototype.getNewStr = function() {
+  var newStr = "";
+  for (var i=0; i<this.tokens.length; i++) {
+    var token = this.tokens[i];
+    if (!token) {
+      continue;
+    }
+    if (token.type !== "space" && token.type !== "string" && token.type !== "number" && token.type !== "other" && token.type !== "eos") {
+      continue;
+    }
+    
+    if (token.type === "space" && (!newStr || newStr.slice(-1) === " ")) {
+      continue;
+    }
+    
+    if (token.type === "other" && !newStr) {
+      continue;
+    }
+    
+    if (token.type === "other" && newStr.slice(-1) === " " && token.str.match(/[!.,?:;]+/)) {
+      newStr = newStr.replace(/\s+$/, "");
+    }
+    
+    if (token.type === "eos") {
+      newStr = newStr.replace(/\s+$/, "");
+      continue;
+    }
+    newStr += token.str;
+  }
+  return newStr;
+};
+
 
 /**
  * Lookahead `n` tokens.
@@ -569,7 +608,7 @@ parser.prototype.lookahead = function(n){
   var fetch = n - this.stash.length;
   if (fetch == 0) return this.lookahead(++n);
   while (fetch-- > 0) this.stash.push(this.advance());
-  return this.stash[--n];
+  return this.stash[--n].type;
 };
 
 /**
@@ -580,7 +619,13 @@ parser.prototype.lookahead = function(n){
  */
 
 parser.prototype.peek = function() {
-  return this.lookahead(1);
+  var i = 0;
+  while (++i) {
+    var tok = this.lookahead(i);
+    if (tok !== "space") {
+      return tok;
+    }
+  }
 };
 
 /**
@@ -592,7 +637,7 @@ parser.prototype.peek = function() {
 
 parser.prototype.next = function() {
   var tok = this.stashed() || this.advance();
-  return tok;
+  return tok.type;
 };
 
 /**
@@ -621,12 +666,12 @@ parser.prototype.skip = function(len){
 };
 
 /**
- * EOS
+ * space
  */
 
 parser.prototype.eos = function() {
   if (this.str.length) return;
-  return 'eos';
+  return { type: 'eos', str: "" };
 };
 
 /**
@@ -637,7 +682,7 @@ parser.prototype.space = function() {
   var captures;
   if (captures = /^([ \t]+)/.exec(this.str)) {
     this.skip(captures);
-    return this.advance();
+    return { type: "space", str: captures[0] }
   }
 };
 
@@ -649,7 +694,7 @@ parser.prototype.second = function() {
   var captures;
   if (captures = this.locales.words.rSeconds.exec(this.str)) {
     this.skip(captures);
-    return 'second';
+    return { type: 'second', str: captures[0] };
   }
 };
 
@@ -661,7 +706,7 @@ parser.prototype.minute = function() {
   var captures;
   if (captures = this.locales.words.rMinutes.exec(this.str)) {
     this.skip(captures);
-    return 'minute';
+    return { type: 'minute', str: captures[0] };
   }
 };
 
@@ -673,7 +718,7 @@ parser.prototype.hour = function() {
   var captures;
   if (captures = this.locales.words.rHours.exec(this.str)) {
     this.skip(captures);
-    return 'hour';
+    return { type: 'hour', str: captures[0] };
   }
 };
 
@@ -685,7 +730,7 @@ parser.prototype.day = function() {
   var captures;
   if (captures = this.locales.words.rDays.exec(this.str)) {
     this.skip(captures);
-    return 'day';
+    return { type: "day", str: captures[0] };
   }
 };
 
@@ -695,13 +740,13 @@ parser.prototype.day = function() {
  */
 parser.prototype.dayByName = function() {
   var captures;
-  var r = new RegExp('^' + this.locales.rDays.source);
+  var r = new RegExp('^' + this.locales.rDays.source, "i");
   if (captures = r.exec(this.str)) {
-    var day = captures[1];
+    var day = captures[1].toLowerCase();
     var index = this.locales.days.indexOf(day);
     this.skip(captures);
     this.date.updateDay(index, 1);
-    return captures[1];
+    return { type: day, str: captures[0] };
   }
 };
 
@@ -716,21 +761,22 @@ parser.prototype.monthByName = function() {
   var month;
   if (captures = this.locales.rMonths.exec(this.str)) {
     day = captures[2];
-    month = captures[4];
+    month = captures[4].toLowerCase();
   } else if (this.locales.rMonths2 && (captures = this.locales.rMonths2.exec(this.str))) {
     day = captures[3];
-    month = captures[1];
+    month = captures[1].toLowerCase();
   }
   
   if (day && month) {
     this.date.date.setMonth((this.locales.months.indexOf(month)));
-    this.date._changed['month'] = true;
+    this.date._changed['months'] = true;
     if (day) {
       this.date.date.setDate(parseInt(day));
       this.date._changed['days'] = true;
     }
     this.skip(captures);
-    return captures[0];
+    
+    return { type: captures[0], str: captures[0] }
   }
 };
 
@@ -739,13 +785,13 @@ parser.prototype.timeAgo = function() {
   var captures;
   if (captures = this.locales.rAgo.exec(this.str)) {
     var num = captures[1];
-    var mod = captures[2];
+    var mod = captures[2].toLowerCase();
     
     var methodName = this.locales.agoMapping[mod];
     
     this.date[methodName](-num);
     this.skip(captures);
-    return 'timeAgo';
+    return { type: 'timeAgo', str: captures[0] };
   }
 };
 
@@ -757,7 +803,7 @@ parser.prototype.week = function() {
   var captures;
   if (captures = this.locales.words.rWeeks.exec(this.str)) {
     this.skip(captures);
-    return 'week';
+    return { type: 'week', str: captures[0] };
   }
 };
 
@@ -769,7 +815,7 @@ parser.prototype.month = function() {
   var captures;
   if (captures = this.locales.words.rMonths.exec(this.str)) {
     this.skip(captures);
-    return 'month';
+    return { type: 'month', str: captures[0] };
   }
 
 };
@@ -782,7 +828,12 @@ parser.prototype.year = function() {
   var captures;
   if (captures = this.locales.words.rYears.exec(this.str)) {
     this.skip(captures);
-    return 'year';
+    var newStr = this.getNewStr();
+    // Filter out "new years eve"
+    if (newStr.match(/\bnew/i)) {
+      return { type: 'string', str: captures[0] };
+    }
+    return { type: 'year', str: captures[0] };
   }
 };
 
@@ -795,7 +846,7 @@ parser.prototype.meridiem = function() {
   if (captures = this.locales.rMeridiem.exec(this.str)) {
     this.skip(captures);
     this.time(captures[1], captures[3], captures[5], captures[6]);
-    return 'meridiem';
+    return { type: 'meridiem', str: captures[0] };
   }
 };
 
@@ -808,20 +859,7 @@ parser.prototype.hourminute = function() {
   if (captures = this.locales.rHourMinute.exec(this.str)) {
     this.skip(captures);
     this.time(captures[1], captures[3], captures[5]);
-    return 'hourminute';
-  }
-};
-
-/**
- * Hour (ex. 5 o'clock)
- */
-
-parser.prototype.houroclock = function() {
-  var captures;
-  if (captures = this.locales.rHourOclock.exec(this.str)) {
-    this.skip(captures);
-    this.time(captures[1], 0, 0);
-    return 'oclock';
+    return { type: 'hourminute', str: captures[0] };
   }
 };
 
@@ -831,11 +869,11 @@ parser.prototype.houroclock = function() {
 
 parser.prototype.athour = function() {
   var captures;
-  if (captures = this.locales.rAtHour.exec(this.str)) {
+  if ((captures = this.locales.rAtHour.exec(this.str)) || (captures = this.locales.rAtHour2.exec(this.str))) {
     this.skip(captures);
     this.time(captures[1], 0, 0, this._meridiem);
     this._meridiem = null;
-    return 'athour';
+    return { type: 'athour', str: captures[0] };
   }
 };
 
@@ -867,7 +905,7 @@ parser.prototype.time = function(h, m, s, meridiem) {
 
 parser.prototype.nextTime = function(before) {
   var d = this.date;
-  var orig = this.original.toLowerCase();
+  var orig = this.oldStr.toLowerCase();
   if (before <= d.date || this.locales.rPast.test(orig)) {
     return this;
   }
@@ -893,9 +931,23 @@ parser.prototype.yesterday = function() {
   if (captures = this.locales.words.rYesterday.exec(this.str)) {
     this.skip(captures);
     this.date.day(-1);
-    return 'yesterday';
+    return { type: 'yesterday', str: captures[0] };
   }
 };
+
+/**
+ * Day after tomorrow
+ */
+
+parser.prototype.dayAfterTomorrow = function() {
+  var captures;
+  if (captures = this.locales.words.rDayAfterTomorrow.exec(this.str)) {
+    this.skip(captures);
+    this.date.day(2);
+    return { type: 'dayaftertomorrow', str: captures[0] };
+  }
+};
+
 
 /**
  * Tomorrow
@@ -906,9 +958,10 @@ parser.prototype.tomorrow = function() {
   if (captures = this.locales.words.rTomorrow.exec(this.str)) {
     this.skip(captures);
     this.date.day(1);
-    return 'tomorrow';
+    return { type: 'tomorrow', str: captures[0] };
   }
 };
+
 
 /**
  * Noon
@@ -920,7 +973,7 @@ parser.prototype.noon = function() {
     this.skip(captures);
     var before = this.date.clone();
     this.date.date.setHours(12, 0, 0);
-    return 'noon';
+    return { type: 'noon', str: captures[0] };
   }
 };
 
@@ -934,7 +987,7 @@ parser.prototype.midnight = function() {
     this.skip(captures);
     var before = this.date.clone();
     this.date.date.setHours(0, 0, 0);
-    return 'midnight';
+    return { type: 'midnight', str: captures[0] };
   }
 };
 
@@ -949,7 +1002,7 @@ parser.prototype.night = function() {
     this._meridiem = 'pm';
     var before = this.date.clone();
     this.date.date.setHours(19, 0, 0);
-    return 'night'
+    return { type: 'night', str: captures[0] };
   }
 };
 
@@ -964,7 +1017,7 @@ parser.prototype.evening = function() {
     this._meridiem = 'pm';
     var before = this.date.clone();
     this.date.date.setHours(17, 0, 0);
-    return 'evening'
+    return { type: 'evening', str: captures[0] };
   }
 };
 
@@ -982,7 +1035,7 @@ parser.prototype.afternoon = function() {
     if (this.date.changed('hours')) return 'afternoon';
 
     this.date.date.setHours(14, 0, 0);
-    return 'afternoon';
+    return { type: 'afternoon', str: captures[0] };
   }
 };
 
@@ -998,7 +1051,7 @@ parser.prototype.morning = function() {
     this._meridiem = 'am';
     var before = this.date.clone();
     if (!this.date.changed('hours')) this.date.date.setHours(8, 0, 0);
-    return 'morning';
+    return { type: 'morning', str: captures[0] };
   }
 };
 
@@ -1011,7 +1064,7 @@ parser.prototype.tonight = function() {
   if (captures = this.locales.words.rTonight.exec(this.str)) {
     this.skip(captures);
     this._meridiem = 'pm';
-    return 'tonight';
+    return { type: 'tonight', str: captures[0] };
   }
 };
 
@@ -1041,7 +1094,7 @@ parser.prototype._next = function() {
       this.date.day(1);
     }
 
-    return 'next';
+    return { type: 'next', str: captures[0] };
   }
 };
 
@@ -1071,7 +1124,7 @@ parser.prototype.last = function() {
       this.date.day(-1);
     }
 
-    return 'last';
+    return { type: 'last', str: captures[0] };
   }
 };
 
@@ -1083,7 +1136,7 @@ parser.prototype.ago = function() {
   var captures;
   if (captures = this.locales.words.rAgo.exec(this.str)) {
     this.skip(captures);
-    return 'ago';
+    return { type: 'ago', str: captures[0] };
   }
 };
 
@@ -1093,10 +1146,16 @@ parser.prototype.ago = function() {
 
 parser.prototype.number = function() {
   var captures;
-  if (captures = /^(\d+)/.exec(this.str)) {
+  if (captures = /^(?:in\s+)?(\d+)/i.exec(this.str)) {
     var n = captures[1];
     this.skip(captures);
     var mod = this.peek();
+
+    // already changed?
+    if (this.date[mod] && this.date._changed[mod + "s"]) {
+      return { type: 'number', str: captures[0] };
+    }
+    
     // If we have a defined modifier, then update
     if (this.date[mod]) {
       if ('ago' == this.peek()) n = -n;
@@ -1105,12 +1164,11 @@ parser.prototype.number = function() {
       // when we don't have meridiem, possibly use context to guess
       this.time(n, 0, 0, this._meridiem);
       this._meridiem = null;
-    } else if (this.original.toLowerCase().match(this.locales.words.rAt)) {
-      this.time(n, 0, 0, this._meridiem);
-      this._meridiem = null;
+    } else {
+      return { type: 'number', str: captures[0] };
     }
-
-    return 'number';
+    
+    return { type: 'time', str: captures[0] };
   }
 };
 
@@ -1120,9 +1178,9 @@ parser.prototype.number = function() {
 
 parser.prototype.string = function() {
   var captures;
-  if (captures = /^\w+/.exec(this.str)) {
+  if (captures = /^[a-zäüößèéêáàâóòôíìîúùû]+/i.exec(this.str)) {
     this.skip(captures);
-    return 'string';
+    return { type: 'string', str: captures[0] };
   }
 };
 
@@ -1134,7 +1192,7 @@ parser.prototype.other = function() {
   var captures;
   if (captures = /^./.exec(this.str)) {
     this.skip(captures);
-    return 'other';
+    return { type: 'other', str: captures[0] };
   }
 };
 
@@ -1145,15 +1203,15 @@ var date18n = {
   months:         ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
   
   // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
-  rMeridiem:      /^(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/,
-  rHourMinute:    /^(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?/,
-  rHourOclock:    /^(\d+)\s*o\'?clock\b/,
-  rAtHour:        /^at\s?(\d{1,2})$/,
-  rDays:          /\b(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/,
-  rMonths:        /^((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)/,
-  rMonths2:       /^(january|february|march|april|may|june|july|august|september|october|november|december)\s+((\d{1,2})(st|nd|rd|th))/,
-  rPast:          /\b(last|yesterday|ago)\b/,
-  rAgo:           /^(\d*)\s?\b(second|sec|minute|min|hour|h|day|week|month|year)[s]?\s+ago\b/,
+  rMeridiem:      /^(?:at\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
+  rHourMinute:    /^(?:at\s+)?(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?(\s*o(?:\'|\s+)?clock\b)?/i,
+  rAtHour:        /^at\s*(\d{1,2})(\s*o(?:\'|\s+)?clock\b)?/i,
+  rAtHour2:       /^(\d{1,2})\s*o(?:\'|\s+)?clock\b/i,
+  rDays:          /\b(?:(?:on|at)\s+)?(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/i,
+  rMonths:        /^(?:(?:at|on)\s+(?:the\s+)?)?((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)/i,
+  rMonths2:       /^(?:(?:at|on)\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+((\d{1,2})(st|nd|rd|th))/i,
+  rPast:          /\b(last|yesterday|ago)\b/i,
+  rAgo:           /^(\d*)\s?\b(second|sec|minute|min|hour|h|day|week|month|year)[s]?\s+ago\b/i,
   
   agoMapping: {
     "second": "second",
@@ -1169,26 +1227,27 @@ var date18n = {
   },
   
   words: {
-    rSeconds:       /^s(ec|econd)?s?/,
-    rMinutes:       /^m(in|inute)?s?/,
-    rHours:         /^h(r|our)s?/,
-    rDays:          /^d(ay)?s?/,
-    rWeeks:         /^w(k|eek)s?/,
-    rMonths:        /^mon(th)?(es|s)?\b/,
-    rYears:         /^y(r|ear)s?/,
-    rYesterday:     /^(yes(terday)?)/,
-    rTomorrow:      /^tom(orrow)?/,
-    rNoon:          /^noon\b/,
-    rMidnight:      /^midnight\b/,
-    rNight:         /^night\b/,
-    rEvening:       /^evening\b/,
-    rAfternoon:     /^afternoon\b/,
-    rMorning:       /^morning\b/,
-    rTonight:       /^tonight\b/,
-    rNext:          /^next/,
-    rLast:          /^last/,
-    rAgo:           /^ago\b/,
-    rAt:            /\bat\s/
+    rSeconds:           /^(sec|second)s?\b/i,
+    rMinutes:           /^(min|minute)s?\b/i,
+    rHours:             /^h(r|our)s?\b/i,
+    rDays:              /^days?\b/i,
+    rWeeks:             /^w(k|eek)s?\b/i,
+    rMonths:            /^mon(th)?(es|s)?\b/i,
+    rYears:             /^y(r|ear)s?\b/i,
+    rYesterday:         /^yesterday/i,
+    rTomorrow:          /^tomorrow/i,
+    rDayAfterTomorrow:  /^(?:(?:at\s+|on\s+)?the\s+)?day\s+after\s+tomorrow/i,
+    rNoon:              /^(?:(?:at|in|on)\s+(?:the\s+)?)?noon\b/i,
+    rMidnight:          /^(?:(?:at|in|on)\s+(?:the\s+)?)?midnight\b/i,
+    rNight:             /^(?:(?:at|in|on)\s+(?:the\s+)?)?night\b/i,
+    rEvening:           /^(?:(?:at|in|on)\s+(?:the\s+)?)?evening\b/i,
+    rAfternoon:         /^(?:(?:at|in|on)\s+(?:the\s+)?)?afternoon\b/i,
+    rMorning:           /^(?:(?:at|in|on)\s+(?:the\s+)?)?morning\b/i,
+    rTonight:           /^(?:(?:at|in|on)\s+(?:the\s+)?)?tonight\b/i,
+    rNext:              /^(?:(?:at|in|on)\s+(?:the\s+)?)?next/i,
+    rLast:              /^(?:(?:at|in|on)\s+(?:the\s+)?)?last/i,
+    rAgo:               /^ago\b/i,
+    rAt:                /\b(at|on|in)\s/i
   }
   
 };
@@ -1201,14 +1260,14 @@ var date18n = {
   months:         ['januar', 'februar', 'märz', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember'],
   
   // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
-  rMeridiem:      /^(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/,
-  rHourMinute:    /^(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?/,
-  rHourOclock:    /^(\d+)\s*uhr\b/,
-  rAtHour:        /^um\s?(\d{1,2})$/,
-  rDays:          /\b(sonntag|montag|dienstag|mittwoch|donnerstag|freitag|samstag)s?\b/,
-  rMonths:        /^((\d{1,2})(\.))\s+(januar|februar|m(ä|ae)rz|april|mai|juni|juli|august|september|oktober|november|dezember)/,
-  rPast:          /\b(letzte(n|r|s)?|gestern|vor)\b/,
-  rAgo:           /^vor\s+(\d*)\s?\b(sekunde|sek|min|minute|stunde|std|tag|woche|monat|jahr)(n|en)?\b/,
+  rMeridiem:      /^(?:um\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
+  rHourMinute:    /^(?:um\s+)?(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?(\s*uhr\b)?/i,
+  rAtHour:        /^um\s*(\d{1,2})(\s*uhr\b)?/i,
+  rAtHour2:       /^(\d{1,2})\s*uhr\b/i,
+  rDays:          /\b(?:am\s+)?(sonntag|montag|dienstag|mittwoch|donnerstag|freitag|samstag)s?\b/i,
+  rMonths:        /^(?:am\s+)?((\d{1,2})(\.))\s+(januar|februar|m(ä|ae)rz|april|mai|juni|juli|august|september|oktober|november|dezember)/i,
+  rPast:          /\b(letzte(n|r|s)?|gestern|vor)\b/i,
+  rAgo:           /^vor\s+(\d*)\s?\b(sekunde|sek|min|minute|stunde|std|tag|woche|monat|jahr)(n|en)?\b/i,
   
   agoMapping: {
     "sekunde":  "second",
@@ -1224,26 +1283,27 @@ var date18n = {
   },
   
   words: {
-    rSeconds:       /^(sek|ekunde|sekunden)/,
-    rMinutes:       /^(min|inuten|m\b)/,
-    rHours:         /^(h|std|stunden|stunde)/,
-    rDays:          /^tag(en)?/,
-    rWeeks:         /^woche(n)?/,
-    rMonths:        /^monat(e|en)?\b/,
-    rYears:         /^jahr(en)?/,
-    rYesterday:     /^gestern/,
-    rTomorrow:      /^morgen\b/,
-    rNoon:          /^mittag(s)?\b/,
-    rMidnight:      /^mitternacht(s)?\b/,
-    rNight:         /^nacht(s)?\b/,
-    rEvening:       /^abend(s)?\b/,
-    rAfternoon:     /^nach\s?mittag(s)?\b/,
-    rMorning:       /^(morgens|frueh|früh|am morgen)\b/,
-    rTonight:       /^heute\s+(nacht|abend)\b/,
-    rNext:          /^n(ä|ae)chste(n|r|s)?/,
-    rLast:          /^letzte(n|r|s)?/,
-    rAgo:           /^vor\b/,
-    rAt:            /\b(um|am)\s/
+    rSeconds:           /^(sek|ekunde|sekunden)/i,
+    rMinutes:           /^(min|minuten)\b/i,
+    rHours:             /^(h|std|stunden|stunde)\b/i,
+    rDays:              /^tag(en)?/i,
+    rWeeks:             /^woche(n)?/i,
+    rMonths:            /^monat(e|en)?\b/i,
+    rYears:             /^jahr(en)?/i,
+    rYesterday:         /^gestern/i,
+    rTomorrow:          /^morgen\b/i,
+    rDayAfterTomorrow:  /^(ü|ue)ber\s?morgen\b/i,
+    rNoon:              /^(?:(?:am|im)\s+)?mittag(s)?\b/i,
+    rAfternoon:         /^(?:(?:am|im)\s+)?nach\s?mittag(s)?\b/i,
+    rMidnight:          /^(?:um\s+)?mitter\s?nacht(s)?\b/i,
+    rNight:             /^(?:sp(?:ae|ä)t\s)?nacht(s)?\b/i,
+    rEvening:           /^(?:sp(?:ae|ä)t\s)?abend(s)?\b/i,
+    rMorning:           /^(morgens|frueh|früh|am morgen)\b/i,
+    rTonight:           /^heute\s+(nacht|abend)\b/i,
+    rNext:              /^(?:(?:am|im)\s+)?n(ä|ae)chste(n|r|s)?/i,
+    rLast:              /^(?:(?:am|im)\s+)?letzte(n|r|s)?/i,
+    rAgo:               /^vor\b/i,
+    rAt:                /\b(um|am|im)\s/i
   }
   
 };

@@ -20,12 +20,6 @@ var mon = new Date('May 13, 2013 01:30:00');
  */
 
 describe('minutes', function () {
-  it('10m', function () {
-    var date = parse('10m', mon, "de");
-    assert('1:40:00' == t(date));
-    assert('5/13/13' == d(date));
-  });
-
   it('10min', function () {
     var date = parse('10min', mon, "de");
     assert('1:40:00' == t(date));
@@ -146,8 +140,8 @@ describe('tage', function () {
  */
 
 describe('datums', function () {
-  it('dienstag um 9', function () {
-    var date = parse('dienstag um 9', mon, "de");
+  it('Dienstag um 9', function () {
+    var date = parse('Dienstag um 9', mon, "de");
     assert('9:00:00' == t(date));
     assert('5/14/13' == d(date));
   });
@@ -234,6 +228,30 @@ describe('morgen', function () {
     var date = parse('Morgen 16:22', mon, "de");
     assert('16:22:00' == t(date));
     assert('5/14/13' == d(date));
+  });
+});
+
+
+/**
+ * Übermorgen
+ */
+describe('übermorgen', function () {
+  it('übermorgen um 15 uhr', function () {
+    var date = parse('übermorgen um 15 uhr', mon, "de");
+    assert('15:00:00' == t(date));
+    assert('5/15/13' == d(date));
+  });
+  
+  it('über morgen um 15 uhr', function () {
+    var date = parse('über morgen um 15 uhr', mon, "de");
+    assert('15:00:00' == t(date));
+    assert('5/15/13' == d(date));
+  });
+  
+  it('ueber Morgen um 15 uhr', function () {
+    var date = parse('ueber Morgen um 15 uhr', mon, "de");
+    assert('15:00:00' == t(date));
+    assert('5/15/13' == d(date));
   });
 });
 
@@ -924,6 +942,123 @@ describe('support "ago" modifier (fixes: #20)', function (){
     assert('5/13/03' == d(date));
   });
 
+});
+
+
+describe('gives string without dates', function () {
+  var after = new Date('May 13, 2013 13:30:00');
+  
+  it('nächste woche um 17:00 uhr pizza essen', function() {
+    var date = parse('nächste woche um 17:00 uhr pizza essen', after, "de");
+    assert('pizza essen' === date.newStr);
+    assert("5/20/13" === d(date));
+    assert("17:00:00" === t(date));
+  });
+  
+  it('nächste woche 17:00 uhr pizza essen', function() {
+    var date = parse('nächste woche 17:00 uhr pizza essen', after, "de");
+    assert('pizza essen' === date.newStr);
+    assert("5/20/13" === d(date));
+    assert("17:00:00" === t(date));
+  });
+  
+  it('nächste woche um 17:00 pizza essen', function() {
+    var date = parse('nächste woche um 17:00 pizza essen', after, "de");
+    assert('pizza essen' === date.newStr);
+    assert("5/20/13" === d(date));
+    assert("17:00:00" === t(date));
+  });
+  
+  it('nächste woche um 17 uhr pizza essen', function() {
+    var date = parse('nächste woche um 17 uhr pizza essen', after, "de");
+    assert('pizza essen' === date.newStr);
+    assert("5/20/13" === d(date));
+    assert("17:00:00" === t(date));
+  });
+  
+  it('nächsten montag um 5 pizza essen', function() {
+    var date = parse('nächsten montag um 5 pizza essen', after, "de");
+    assert('pizza essen' === date.newStr);
+    assert("5/20/13" === d(date));
+    assert("5:00:00" === t(date));
+  });
+  
+  it('am nächsten montag in die Stadt fahren!', function() {
+    var date = parse('am nächsten montag in die Stadt fahren!', after, "de");
+    assert('in die Stadt fahren!' === date.newStr);
+  });
+  
+  it('vor 2 wochen in die stadt fahren', function() {
+    var date = parse('vor 2 wochen in die stadt fahren', after, "de");
+    assert('in die stadt fahren' === date.newStr);
+    assert("4/29/13" === d(date));
+  });
+  
+  it('in 2 stunden feierabend', function() {
+    var date = parse('in 2 stunden feierabend', after, "de");
+    assert('feierabend' === date.newStr);
+    assert("5/13/13" === d(date));
+    assert("15:30:00" === t(date));
+  });
+  
+  it('in 2 stunden bis 100 zählen', function() {
+    var date = parse('in 2 stunden bis 100 zählen', after, "de");
+    assert('bis 100 zählen' === date.newStr);
+    assert("5/13/13" === d(date));
+    assert("15:30:00" === t(date));
+  });
+  
+  it('thomas anrufen: +49 190 99 88 15', function() {
+    var date = parse('thomas anrufen: +49 190 99 88 15', after, "de");
+    assert('thomas anrufen: +49 190 99 88 15' === date.newStr);
+  });
+  
+
+  
+  it('in 15 minuten mit thomas treffen', function() {
+    var date = parse('in 15 minuten mit thomas treffen', after, "de");
+    assert('mit thomas treffen' === date.newStr);
+  });
+  
+  it('morgen am mittag pizza essen mit freunden', function() {
+    var date = parse('morgen am nachmittag pizza essen mit freunden', after, "de");
+    assert('pizza essen mit freunden' === date.newStr);
+  });
+  
+  it('Am 5. Januar spät abends ins Kino', function() {
+    var date = parse('Am 5. Januar spät abends ins Kino', after, "de");
+    assert('ins Kino' === date.newStr);
+  });
+  
+  it('Am Samstag Nachmittag Shoppen', function() {
+    var date = parse('Am Samstag Nachmittag Shoppen', after, "de");
+    assert('Shoppen' === date.newStr);
+  });
+  
+  it("Am Donnerstag ins Kino abends", function() {
+    var date = parse('Am Donnerstag ins Kino abends', after, "de");
+    assert('ins Kino' === date.newStr);
+  });
+  
+  it("Ich gehe um 9 uhr brunchen mit Sergej am Samstag", function() {
+    var date = parse('Ich gehe um 9 uhr brunchen mit Sergej am Samstag', after, "de");
+    assert('Ich gehe brunchen mit Sergej' === date.newStr);
+    assert("5/18/13" === d(date));
+    assert("9:00:00" === t(date));
+  });
+  
+  it("am 31. dezember um 23:59: silvester", function() {
+    var date = parse('am 31. Dezember um 23:59: Silvester', after, "de");
+    assert('Silvester' === date.newStr);
+    assert("12/31/13" === d(date));
+    assert("23:59:00" === t(date));
+  });
+  
+  it("Übermorgen Kaffee trinken mit Werner!!", function() {
+    var date = parse('Übermorgen Kaffee trinken mit Werner!!', after, "de");
+    assert('Kaffee trinken mit Werner!!' === date.newStr);
+    assert("5/15/13" === d(date));
+  });
 });
 
 
