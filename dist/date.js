@@ -500,8 +500,8 @@ module.exports = parser;
 function parser(str, offset, lang) {
   if(!(this instanceof parser)) return new parser(str, offset, lang);
   if(typeof offset == 'string') offset = parser(offset);
-  lang = lang || "en";
-  this.locales = dateLocales[lang];
+  this.lang = lang || "en";
+  this.locales = dateLocales[this.lang];
   var d = offset || new Date;
   this.date = new date(d);
   this.str = str;
@@ -531,6 +531,7 @@ parser.prototype.advance = function() {
     || this.last()
     || this.dayByName()
     || this.monthByName()
+    || this.monthDate()
     || this.timeAgo()
     || this.ago()
     || this.yesterday()
@@ -735,6 +736,41 @@ parser.prototype.day = function() {
 
 
 /**
+ * Date eg. 11/31/2009
+ */
+
+parser.prototype.monthDate = function() {
+  var captures;
+  if (captures = this.locales.rDate.exec(this.str)) {
+    this.skip(captures);
+    if (this.lang === "en") {
+      this.date.date.setDate(parseInt(captures[2], 10));
+      this.date.date.setMonth(parseInt(captures[1], 10) - 1);
+      this.date._changed['months'] = true;
+      this.date._changed['days'] = true;
+    } else if (this.lang === "de") {
+      this.date.date.setDate(parseInt(captures[1], 10));
+      this.date.date.setMonth(parseInt(captures[2], 10) - 1);
+      
+      // Hack
+      if (!captures[3] && this.str.charAt(0) === ".") {
+        this.skip(1);
+      }
+      
+      this.date._changed['months'] = true;
+      this.date._changed['days'] = true;
+    }
+    
+    if (captures[3]) {
+      this.date.date.setYear(parseInt(captures[3], 10));
+      this.date._changed['years'] = true;
+    }
+    return { type: "monthDate", str: captures[0] };
+  }
+};
+
+
+/**
  * Day by name
  */
 parser.prototype.dayByName = function() {
@@ -913,9 +949,9 @@ parser.prototype.nextTime = function(before) {
   // If time is in the past, we need to guess at the next time
   if (this.locales.rDays.test(orig)) {
     d.day(7);
-  } else if (d.date.getMonth() < before.getMonth()) {
+  } else if (d.date.getMonth() < before.getMonth() && !this.date._changed['years']) {
     d.year(1);
-  } else if ((before - d.date) / 1000 > 60) {
+  } else if ((before - d.date) / 1000 > 60 && !this.date._changed['days']) {
     d.day(1);
   }
 
@@ -1205,6 +1241,7 @@ var date18n = {
   
   // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
   rMeridiem:      /^(?:at\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
+  rDate:          /^(?:(?:at|on)\s+(?:the\s+)?)?(\d{1,2})\/(\d{1,2})\/?(\d{2,4})?\b/i,
   rHourMinute:    /^(?:at\s+)?(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?(\s*o(?:\'|\s+)?clock\b)?/i,
   rAtHour:        /^at\s*(\d{1,2})(\s*o(?:\'|\s+)?clock\b)?/i,
   rAtHour2:       /^(\d{1,2})\s*o(?:\'|\s+)?clock\b/i,
@@ -1263,6 +1300,7 @@ var date18n = {
   
   // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
   rMeridiem:      /^(?:um\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
+  rDate:          /^(?:am\s+|an\s+dem\s+)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?\b/i,
   rHourMinute:    /^(?:um\s+)?(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?(\s*uhr\b)?/i,
   rAtHour:        /^um\s*(\d{1,2})(\s*uhr\b)?/i,
   rAtHour2:       /^(\d{1,2})\s*uhr\b/i,

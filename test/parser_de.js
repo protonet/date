@@ -957,6 +957,47 @@ describe('support "ago" modifier (fixes: #20)', function (){
 });
 
 
+describe('month dates', function () {
+  var after = new Date('May 13, 2013 13:30:00');
+  
+  it('15.11', function () {
+    var date = parse('15.11', after, "de");
+    assert('13:30:00' == t(date));
+    assert('11/15/13' == d(date));
+  });
+  
+  it('15.11.2022', function () {
+    var date = parse('15.11.2022', after, "de");
+    assert('13:30:00' == t(date));
+    assert('11/15/22' == d(date));
+  });
+  
+  it('22.1.18', function () {
+    var date = parse('22.1.18', after, "de");
+    assert('13:30:00' == t(date));
+    assert('1/22/18' == d(date));
+  });
+  
+  it('22.01.18', function () {
+    var date = parse('22.1.18', after, "de");
+    assert('13:30:00' == t(date));
+    assert('1/22/18' == d(date));
+  });
+  
+  it('am 22.1', function () {
+    var date = parse('am 22.1', after, "de");
+    assert('13:30:00' == t(date));
+    assert('1/22/14' == d(date));
+  });
+  
+  it('an dem 22.01', function () {
+    var date = parse('an dem 22.1', after, "de");
+    assert('13:30:00' == t(date));
+    assert('1/22/14' == d(date));
+  });
+});
+
+
 describe('gives string without dates', function () {
   var after = new Date('May 13, 2013 13:30:00');
   
@@ -1025,8 +1066,6 @@ describe('gives string without dates', function () {
     assert('thomas anrufen: +49 190 99 88 15' === date.newStr);
   });
   
-
-  
   it('in 15 minuten mit thomas treffen', function() {
     var date = parse('in 15 minuten mit thomas treffen', after, "de");
     assert('mit thomas treffen' === date.newStr);
@@ -1070,6 +1109,21 @@ describe('gives string without dates', function () {
     var date = parse('Übermorgen Kaffee trinken mit Werner!!', after, "de");
     assert('Kaffee trinken mit Werner!!' === date.newStr);
     assert("5/15/13" === d(date));
+  });
+  
+  it("Christopher's 25. Geburtstag am 26.1. feiern.", function() {
+    var date = parse("Christopher's 25. Geburtstag am 26.1. feiern.", after, "de");
+    console.log(date.newStr)
+    assert("Christopher's 25. Geburtstag feiern." === date.newStr);
+    assert("1/26/14" === d(date));
+    assert("13:30:00" === t(date));
+  });
+  
+  it("Christopher's 25. Geburtstag am 26.1 feiern um 14:00.", function() {
+    var date = parse("Christopher's 25. Geburtstag am 26.1 feiern um 14:00.", after, "de");
+    assert("Christopher's 25. Geburtstag feiern." === date.newStr);
+    assert("1/26/14" === d(date));
+    assert("14:00:00" === t(date));
   });
 });
 

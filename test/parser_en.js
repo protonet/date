@@ -821,6 +821,48 @@ describe('support "ago" modifier (fixes: #20)', function (){
 });
 
 
+describe('month dates', function () {
+  var after = new Date('May 13, 2013 13:30:00');
+  
+  it('11/15', function () {
+    var date = parse('11/15', after, "en");
+    assert('13:30:00' == t(date));
+    assert('11/15/13' == d(date));
+  });
+  
+  it('11/15/2022', function () {
+    var date = parse('11/15/2022', after, "en");
+    assert('13:30:00' == t(date));
+    assert('11/15/22' == d(date));
+  });
+  
+  it('1/22/18', function () {
+    var date = parse('1/22/18', after, "en");
+    assert('13:30:00' == t(date));
+    assert('1/22/18' == d(date));
+  });
+  
+  it('01/22/18', function () {
+    var date = parse('01/22/18', after, "en");
+    assert('13:30:00' == t(date));
+    assert('1/22/18' == d(date));
+  });
+  
+  it('on 1/22', function () {
+    var date = parse('on 1/22', after, "en");
+    assert('13:30:00' == t(date));
+    assert('1/22/14' == d(date));
+  });
+  
+  it('at the 1/22.', function () {
+    var date = parse('at the 1/22.', after, "en");
+    assert('13:30:00' == t(date));
+    assert('1/22/14' == d(date));
+  });
+});
+
+
+
 describe('gives string without dates', function () {
   var after = new Date('May 13, 2013 13:30:00');
   
@@ -948,6 +990,20 @@ describe('gives string without dates', function () {
     assert('Buy new shoes' === date.newStr);
     assert("5/15/13" === d(date));
     assert("3:00:00" === t(date));
+  });
+  
+  it("Memorial on 09/11.", function() {
+    var date = parse('Memorial on 09/11.', after, "en");
+    assert('Memorial.' === date.newStr);
+    assert("9/11/13" === d(date));
+    assert("13:30:00" === t(date));
+  });
+  
+  it("World Trade Center Memorial on 09/11/14 at 12:30 pm.", function() {
+    var date = parse('World Trade Center Memorial on 09/11/14 at 12:30 pm.', after, "en");
+    assert('World Trade Center Memorial.' === date.newStr);
+    assert("9/11/14" === d(date));
+    assert("12:30:00" === t(date));
   });
 });
 
