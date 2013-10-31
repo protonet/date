@@ -515,7 +515,6 @@ function parser(str, offset, lang) {
   this.nextTime(d);
   
   this.newStr = this.getNewStr();
-  
   return { date: this.date.date, matches: this.date.matches(), newStr: this.newStr };
 }
 
@@ -1202,6 +1201,7 @@ require.register("date/lib/i18n/en.js", function(exports, require, module){
 var date18n = {
   days:           ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
   months:         ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
+  months2:        ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
   
   // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
   rMeridiem:      /^(?:at\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
@@ -1209,8 +1209,8 @@ var date18n = {
   rAtHour:        /^at\s*(\d{1,2})(\s*o(?:\'|\s+)?clock\b)?/i,
   rAtHour2:       /^(\d{1,2})\s*o(?:\'|\s+)?clock\b/i,
   rDays:          /\b(?:(?:on|at)\s+)?(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/i,
-  rMonths:        /^(?:(?:at|on)\s+(?:the\s+)?)?((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)/i,
-  rMonths2:       /^(?:(?:at|on)\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+((\d{1,2})(st|nd|rd|th))/i,
+  rMonths:        /^(?:(?:at|on)\s+(?:the\s+)?)?((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)/i,
+  rMonths2:       /^(?:(?:at|on)\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)[\s\-]+((\d{1,2})(st|nd|rd|th)?)/i,
   rPast:          /\b(last|yesterday|ago)\b/i,
   rAgo:           /^(\d*)\s?\b(second|sec|minute|min|hour|h|day|week|month|year)[s]?\s+ago\b/i,
   
@@ -1259,6 +1259,7 @@ require.register("date/lib/i18n/de.js", function(exports, require, module){
 var date18n = {
   days:           ['sonntag', 'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag'],
   months:         ['januar', 'februar', 'märz', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember'],
+  months2:        ['jan', 'feb', 'mär', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dez'],
   
   // 5, 05, 5:30, 5.30, 05:30:10, 05:30.10, 05.30.10, at 5
   rMeridiem:      /^(?:um\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
@@ -1266,7 +1267,7 @@ var date18n = {
   rAtHour:        /^um\s*(\d{1,2})(\s*uhr\b)?/i,
   rAtHour2:       /^(\d{1,2})\s*uhr\b/i,
   rDays:          /\b(?:am\s+)?(sonntag|montag|dienstag|mittwoch|donnerstag|freitag|samstag)s?\b/i,
-  rMonths:        /^(?:am\s+)?((\d{1,2})(\.))\s+(januar|februar|m(ä|ae)rz|april|mai|juni|juli|august|september|oktober|november|dezember)/i,
+  rMonths:        /^(?:am\s+)?((\d{1,2})(\.))\s+(jan(?:uar)?|feb(?:ruar)?|m(?:ä|ae)r(?:z)?|apr(?:il)?|mai|jun(?:i)?|jul(?:i)?|aug(?:ust)?|sep(?:tember)?|okt(?:ober)?|nov(?:ember)?|dez(?:ember)?)/i,
   rPast:          /\b(letzte(n|r|s)?|gestern|vor)\b/i,
   rAgo:           /^vor\s+(\d*)\s?\b(sekunde|sek|min|minute|stunde|std|tag|woche|monat|jahr)(n|en)?\b/i,
   
