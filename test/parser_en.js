@@ -736,6 +736,30 @@ describe('months (fixes: #10)', function (){
     assert('13:30:00' == t(date));
     assert('12/23/13' == d(date));
   });
+  
+  it('november 5', function(){
+    var date = parse('november 5', after);
+    assert('13:30:00' == t(date));
+    assert('11/5/13' == d(date));
+  });
+  
+  it('nov 5', function(){
+    var date = parse('nov 5', after);
+    assert('13:30:00' == t(date));
+    assert('11/5/13' == d(date));
+  });
+  
+  it('nov - 05', function(){
+    var date = parse('nov - 05', after);
+    assert('13:30:00' == t(date));
+    assert('11/5/13' == d(date));
+  });
+  
+  it('on nov-05', function(){
+    var date = parse('on nov-05', after);
+    assert('13:30:00' == t(date));
+    assert('11/5/13' == d(date));
+  });
 });
 
 /**

@@ -768,7 +768,8 @@ parser.prototype.monthByName = function() {
   }
   
   if (day && month) {
-    this.date.date.setMonth((this.locales.months.indexOf(month)));
+    var monthIndex = Math.max(this.locales.months.indexOf(month), this.locales.months2.indexOf(month));
+    this.date.date.setMonth(monthIndex);
     this.date._changed['months'] = true;
     if (day) {
       this.date.date.setDate(parseInt(day));

@@ -866,6 +866,18 @@ describe('months (fixes: #10)', function (){
     assert('13:30:00' == t(date));
     assert('12/24/13' == d(date));
   });
+  
+  it('5. november', function(){
+    var date = parse('5. november', after, "de");
+    assert('13:30:00' == t(date));
+    assert('11/5/13' == d(date));
+  });
+  
+  it('22. mär', function(){
+    var date = parse('22. mär', after, "de");
+    assert('13:30:00' == t(date));
+    assert('3/22/14' == d(date));
+  });
 });
 
 /**
