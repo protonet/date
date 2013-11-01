@@ -515,7 +515,8 @@ function parser(str, offset, lang) {
   this.nextTime(d);
   
   this.newStr = this.getNewStr();
-  return { date: this.date.date, matches: this.date.matches(), newStr: this.newStr };
+  
+  return { date: this.date.date, newStr: this.newStr };
 }
 
 /**
