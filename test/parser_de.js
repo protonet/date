@@ -995,6 +995,12 @@ describe('month dates', function () {
     assert('13:30:00' == t(date));
     assert('1/22/14' == d(date));
   });
+  
+  it('11.11.', function () {
+    var date = parse('11.11.', after, "de");
+    assert('13:30:00' == t(date));
+    assert('11/11/13' == d(date));
+  });
 });
 
 
@@ -1113,7 +1119,6 @@ describe('gives string without dates', function () {
   
   it("Christopher's 25. Geburtstag am 26.1. feiern.", function() {
     var date = parse("Christopher's 25. Geburtstag am 26.1. feiern.", after, "de");
-    console.log(date.newStr)
     assert("Christopher's 25. Geburtstag feiern." === date.newStr);
     assert("1/26/14" === d(date));
     assert("13:30:00" === t(date));
@@ -1124,6 +1129,18 @@ describe('gives string without dates', function () {
     assert("Christopher's 25. Geburtstag feiern." === date.newStr);
     assert("1/26/14" === d(date));
     assert("14:00:00" === t(date));
+  });
+  
+  it('Party machen am 11.11.', function () {
+    var date = parse('Party machen am 11.11.', after, "de");
+    assert("Party machen." === date.newStr);
+    assert('13:30:00' == t(date));
+    assert('11/11/13' == d(date));
+  });
+  
+  it('Am 24. Dezember ist Weihnachten', function () {
+    var date = parse('Am 24. Dezember ist Weihnachten', after, "de");
+    assert("Weihnachten" === date.newStr);
   });
 });
 
