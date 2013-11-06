@@ -535,6 +535,7 @@ parser.prototype.advance = function() {
     || this.monthDate()
     || this.timeAgo()
     || this.ago()
+    || this.today()
     || this.yesterday()
     || this.dayAfterTomorrow()
     || this.tomorrow()
@@ -568,9 +569,12 @@ parser.prototype.getNewStr = function() {
   var newStr = "";
   for (var i=0; i<this.tokens.length; i++) {
     var token = this.tokens[i];
+    var previousToken = this.tokens[i - 1] || {};
+    
     if (!token) {
       continue;
     }
+    
     if (token.type !== "space" && token.type !== "string" && token.type !== "number" && token.type !== "other" && token.type !== "eos") {
       continue;
     }
@@ -583,7 +587,7 @@ parser.prototype.getNewStr = function() {
       continue;
     }
     
-    if (token.type === "other" && newStr.slice(-1) === " " && token.str.match(/[!.,?:;]+/)) {
+    if (token.type === "other" && previousToken.type !== "space" && newStr.slice(-1) === " " && token.str.match(/[!.,?]+/)) {
       newStr = newStr.replace(/\s+$/, "");
     }
     
@@ -596,6 +600,14 @@ parser.prototype.getNewStr = function() {
   
   // Hackeedeehack!
   newStr = newStr.replace(/^(ist|is)\s+/i, "");
+  
+  // Check if first char was uppercased
+  var firstChar = this.oldStr.charAt(0);
+  if (firstChar.toUpperCase() === firstChar) {
+    newStr = newStr.replace(/^./, function(firstChar) {
+      return firstChar.toUpperCase();
+    });
+  }
   
   return newStr;
 };
@@ -994,6 +1006,20 @@ parser.prototype.dayAfterTomorrow = function() {
  * Tomorrow
  */
 
+parser.prototype.today = function() {
+  var captures;
+  if (captures = this.locales.words.rToday.exec(this.str)) {
+    this.date._changed['days'] = true;
+    this.skip(captures);
+    return { type: 'today', str: captures[0] };
+  }
+};
+
+
+/**
+ * Tomorrow
+ */
+
 parser.prototype.tomorrow = function() {
   var captures;
   if (captures = this.locales.words.rTomorrow.exec(this.str)) {
@@ -1278,6 +1304,7 @@ var date18n = {
     rMonths:            /^mon(th)?(es|s)?\b/i,
     rYears:             /^y(r|ear)s?\b/i,
     rYesterday:         /^yesterday/i,
+    rToday:             /^today/i,
     rTomorrow:          /^tomorrow/i,
     rDayAfterTomorrow:  /^(?:(?:at\s+|on\s+)?the\s+)?day\s+after\s+tomorrow/i,
     rNoon:              /^(?:(?:at|in|on)\s+(?:the\s+)?)?noon\b/i,
@@ -1336,6 +1363,7 @@ var date18n = {
     rMonths:            /^monat(e|en)?\b/i,
     rYears:             /^jahr(en)?/i,
     rYesterday:         /^gestern/i,
+    rToday:             /^heute/i,
     rTomorrow:          /^morgen\b/i,
     rDayAfterTomorrow:  /^(ü|ue)ber\s?morgen\b/i,
     rNoon:              /^(?:(?:am|im)\s+)?mittag(s)?\b/i,
@@ -1344,7 +1372,7 @@ var date18n = {
     rNight:             /^(?:sp(?:ae|ä)t\s)?nacht(s)?\b/i,
     rEvening:           /^(?:sp(?:ae|ä)t\s)?abend(s)?\b/i,
     rMorning:           /^(morgens|frueh|früh|am morgen)\b/i,
-    rTonight:           /^heute\s+(nacht|abend)\b/i,
+    rTonight:           /^(nacht|abend)\b/i,
     rNext:              /^(?:(?:am|im)\s+)?n(ä|ae)chste(n|r|s)?/i,
     rLast:              /^(?:(?:am|im)\s+)?letzte(n|r|s)?/i,
     rAgo:               /^vor\b/i,

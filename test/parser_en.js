@@ -200,6 +200,26 @@ describe('tomorrow', function () {
   });
 });
 
+
+/**
+ * Today
+ */
+
+describe('today', function () {
+  it('today at 1:00', function () {
+    var date = parse('today at 1:00', mon);
+    assert('1:00:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
+  
+  it('Today 16:22', function () {
+    var date = parse('Today 16:22', mon);
+    assert('16:22:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
+});
+
+
 /**
  * Day After Tomorrow
  */
@@ -875,35 +895,35 @@ describe('gives string without dates', function () {
   
   it('Next week at 17:00 o\'clock eat pizza', function() {
     var date = parse('Next week at 17:00 o\'clock eat pizza', after, "en");
-    assert('eat pizza' === date.newStr);
+    assert('Eat pizza' === date.newStr);
     assert("5/20/13" === d(date));
     assert("17:00:00" === t(date));
   });
   
   it('Next week 17:00 o\'clock eat pizza', function() {
     var date = parse('Next week 17:00 o\'clock eat pizza', after, "en");
-    assert('eat pizza' === date.newStr);
+    assert('Eat pizza' === date.newStr);
     assert("5/20/13" === d(date));
     assert("17:00:00" === t(date));
   });
   
   it('Next week at 17:00 eat pizza', function() {
     var date = parse('Next week at 17:00 eat pizza', after, "en");
-    assert('eat pizza' === date.newStr);
+    assert('Eat pizza' === date.newStr);
     assert("5/20/13" === d(date));
     assert("17:00:00" === t(date));
   });
   
   it('Next week at 17 o clock eat pizza', function() {
     var date = parse('Next week at 17 o clock eat pizza', after, "en");
-    assert('eat pizza' === date.newStr);
+    assert('Eat pizza' === date.newStr);
     assert("5/20/13" === d(date));
     assert("17:00:00" === t(date));
   });
   
   it('Next week at 5 eat pizza', function() {
     var date = parse('Next week at 5 eat pizza', after, "en");
-    assert('eat pizza' === date.newStr);
+    assert('Eat pizza' === date.newStr);
     assert("5/20/13" === d(date));
     assert("5:00:00" === t(date));
   });
@@ -961,7 +981,7 @@ describe('gives string without dates', function () {
   
   it('On thursday go to the club "69" in the evening', function() {
     var date = parse('On thursday go to the club "69" in the evening', after, "en");
-    assert('go to the club "69"' === date.newStr);
+    assert('Go to the club "69"' === date.newStr);
   });
   
   it("I'm going to have brunch at 9 with Sergej on Saturday", function() {
@@ -1019,6 +1039,17 @@ describe('gives string without dates', function () {
   it('Eat pizza :) on wednesday', function () {
     var date = parse('Eat pizza :) on wednesday', after, "en");
     assert("Eat pizza :)" === date.newStr);
+  });
+  
+  
+  it('Have breakfast with the Team today at 8', function () {
+    var date = parse('Have breakfast with the Team today at 8', after, "en");
+    assert("Have breakfast with the Team" === date.newStr);
+  });
+  
+  it('Today at 6pm: Go crazy!', function () {
+    var date = parse('Today at 6pm: Go crazy!', after, "en");
+    assert("Go crazy!" === date.newStr);
   });
 });
 

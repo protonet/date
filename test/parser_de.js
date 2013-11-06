@@ -224,10 +224,28 @@ describe('morgen', function () {
     assert('5/14/13' == d(date));
   });
   
-  it('Morgen 15:00', function () {
+  it('Morgen 16:22', function () {
     var date = parse('Morgen 16:22', mon, "de");
     assert('16:22:00' == t(date));
     assert('5/14/13' == d(date));
+  });
+});
+
+/**
+ * Today
+ */
+
+describe('heute', function () {
+  it('Heute um 1:00', function () {
+    var date = parse('heute um 1:00', mon, "de");
+    assert('1:00:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
+  
+  it('Heute 16:22', function () {
+    var date = parse('Heute 16:22', mon, "de");
+    assert('16:22:00' == t(date));
+    assert('5/13/13' == d(date));
   });
 });
 
@@ -1084,7 +1102,7 @@ describe('gives string without dates', function () {
   
   it('Am 5. Januar spät abends ins Kino', function() {
     var date = parse('Am 5. Januar spät abends ins Kino', after, "de");
-    assert('ins Kino' === date.newStr);
+    assert('Ins Kino' === date.newStr);
   });
   
   it('Am Samstag Nachmittag Shoppen', function() {
@@ -1094,7 +1112,7 @@ describe('gives string without dates', function () {
   
   it("Am Donnerstag ins Kino abends", function() {
     var date = parse('Am Donnerstag ins Kino abends', after, "de");
-    assert('ins Kino' === date.newStr);
+    assert('Ins Kino' === date.newStr);
   });
   
   it("Ich gehe um 9 uhr brunchen mit Sergej am Samstag", function() {
@@ -1151,6 +1169,16 @@ describe('gives string without dates', function () {
   it('Pizza essen :) am Mittwoch', function () {
     var date = parse('Pizza essen :) am Mittwoch', after, "de");
     assert("Pizza essen :)" === date.newStr);
+  });
+  
+  it('Heute morgen um 8 uhr Frühstücken mit dem Team', function () {
+    var date = parse('Heute morgen um 8 uhr Frühstücken mit dem Team', after, "de");
+    assert("Frühstücken mit dem Team" === date.newStr);
+  });
+  
+  it('Heute 18 uhr: Abgehen!', function () {
+    var date = parse('Heute 18 uhr: Abgehen!', after, "de");
+    assert("Abgehen!" === date.newStr);
   });
 });
 
