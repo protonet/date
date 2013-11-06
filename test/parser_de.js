@@ -1142,6 +1142,16 @@ describe('gives string without dates', function () {
     var date = parse('Am 24. Dezember ist Weihnachten', after, "de");
     assert("Weihnachten" === date.newStr);
   });
+
+  it('Pizza essen am Mittwoch :)', function () {
+    var date = parse('Pizza essen am Mittwoch :)', after, "de");
+    assert("Pizza essen :)" === date.newStr);
+  });
+  
+  it('Pizza essen :) am Mittwoch', function () {
+    var date = parse('Pizza essen :) am Mittwoch', after, "de");
+    assert("Pizza essen :)" === date.newStr);
+  });
 });
 
 

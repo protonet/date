@@ -1010,6 +1010,16 @@ describe('gives string without dates', function () {
     var date = parse('On December 24th is Christmas', after, "en");
     assert("Christmas" === date.newStr);
   });
+  
+  it('Eat pizza on wednesday :)', function () {
+    var date = parse('Eat pizza on wednesday :)', after, "en");
+    assert("Eat pizza :)" === date.newStr);
+  });
+  
+  it('Eat pizza :) on wednesday', function () {
+    var date = parse('Eat pizza :) on wednesday', after, "en");
+    assert("Eat pizza :)" === date.newStr);
+  });
 });
 
 
