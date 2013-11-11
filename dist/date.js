@@ -570,6 +570,7 @@ parser.prototype.getNewStr = function() {
   for (var i=0; i<this.tokens.length; i++) {
     var token = this.tokens[i];
     var previousToken = this.tokens[i - 1] || {};
+    var nextToken = this.tokens[i + 1] || {};
     
     if (!token) {
       continue;
@@ -583,7 +584,7 @@ parser.prototype.getNewStr = function() {
       continue;
     }
     
-    if (token.type === "other" && !newStr) {
+    if (token.type === "other" && !newStr && token.str.match(/^[.:,?!;]/)) {
       continue;
     }
     

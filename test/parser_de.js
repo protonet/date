@@ -1180,6 +1180,16 @@ describe('gives string without dates', function () {
     var date = parse('Heute 18 uhr: Abgehen!', after, "de");
     assert("Abgehen!" === date.newStr);
   });
+  
+  it('Heute 18 uhr @[frederik](123)', function () {
+    var date = parse('Heute 18 uhr @[frederik](123)', after, "de");
+    assert("@[frederik](123)" === date.newStr);
+  });
+  
+  it('Heute 18 uhr [@frederik](123)', function () {
+    var date = parse('Heute 18 uhr [@frederik](123)', after, "de");
+    assert("[@frederik](123)" === date.newStr);
+  });
 });
 
 
