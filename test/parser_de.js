@@ -433,6 +433,34 @@ describe('wochen', function () {
     assert('5/21/13' == d(date));
   });
   
+  it('Naechste Woche Dienstag', function() {
+    var wed = new Date('May 15, 2013 01:30:00');
+    var date = parse('Naechste Woche Dienstag', wed, "de");
+    assert('1:30:00' == t(date));
+    assert('5/21/13' == d(date));
+  });
+  
+  // TODO: doesn't really make sense
+  it('Naechste Woche', function() {
+    var sun = new Date('May 12, 2013 01:30:00');
+    var date = parse('Naechste Woche', sun, "de");
+    assert('1:30:00' == t(date));
+    assert('5/20/13' == d(date));
+  });
+  
+  it('Naechste Woche', function() {
+    var date = parse('Naechste Woche', mon, "de");
+    assert('1:30:00' == t(date));
+    assert('5/20/13' == d(date));
+  });
+  
+  it('Naechste Woche', function() {
+    var wed = new Date('May 15, 2013 01:30:00');
+    var date = parse('Naechste Woche', wed, "de");
+    assert('1:30:00' == t(date));
+    assert('5/20/13' == d(date));
+  });
+  
   // TODO:
   // it('Nächste Woche di um 4:30pm', function () {
   //   var date = parse('Nächste Woche Di um 4:30pm', mon);

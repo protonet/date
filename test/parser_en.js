@@ -376,6 +376,34 @@ describe('weeks', function () {
     assert('1:30:00' == t(date));
     assert('5/21/13' == d(date));
   });
+  
+  it('Next week tuesday', function() {
+    var wed = new Date('May 15, 2013 01:30:00');
+    var date = parse('Next week tuesday', wed);
+    assert('1:30:00' == t(date));
+    assert('5/21/13' == d(date));
+  });
+  
+  // TODO: doesn't really make sense
+  it('Next week', function() {
+    var sun = new Date('May 12, 2013 01:30:00');
+    var date = parse('Next week', sun);
+    assert('1:30:00' == t(date));
+    assert('5/20/13' == d(date));
+  });
+  
+  it('Next week', function() {
+    var date = parse('Next week', mon);
+    assert('1:30:00' == t(date));
+    assert('5/20/13' == d(date));
+  });
+  
+  it('Next week', function() {
+    var wed = new Date('May 15, 2013 01:30:00');
+    var date = parse('Next week', wed);
+    assert('1:30:00' == t(date));
+    assert('5/20/13' == d(date));
+  });
 
   it('next week tuesday at 4:30pm', function () {
     var date = parse('next week tuesday at 4:30pm', mon);
