@@ -1051,6 +1051,16 @@ describe('gives string without dates', function () {
     var date = parse('Today at 6pm: Go crazy!', after, "en");
     assert("Go crazy!" === date.newStr);
   });
+  
+  it('Today at 6 @[frederik](123)', function () {
+    var date = parse('Today at 6 @[frederik](123)', after, "en");
+    assert("@[frederik](123)" === date.newStr);
+  });
+  
+  it('Today at 6 [@frederik](123)', function () {
+    var date = parse('Today at 6 [@frederik](123)', after, "en");
+    assert("[@frederik](123)" === date.newStr);
+  });
 });
 
 
