@@ -932,7 +932,11 @@ parser.prototype.athour = function() {
   var captures;
   if ((captures = this.locales.rAtHour.exec(this.str)) || (captures = this.locales.rAtHour2.exec(this.str))) {
     this.skip(captures);
-    this.time(captures[1], 0, 0, this._meridiem);
+    if (captures[1].length === 4) {
+      this.time(captures[1].substr(0, 2), captures[1].substr(2), 0, this._meridiem);
+    } else {
+      this.time(captures[1], 0, 0, this._meridiem);
+    }
     this._meridiem = null;
     return { type: 'athour', str: captures[0] };
   }
@@ -1342,8 +1346,8 @@ var date18n = {
   rMeridiem:      /^(?:um\s+|ab\s+)?(\d{1,2})([:.](\d{1,2}))?([:.](\d{1,2}))?\s*([ap]m)/i,
   rDate:          /^(?:am\s+|an\s+dem\s+|ab\s+)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?\b/i,
   rHourMinute:    /^(?:um\s+|ab\s+)?(\d{1,2})([:.](\d{1,2}))([:.](\d{1,2}))?(\s*uhr\b)?/i,
-  rAtHour:        /^(?:um|ab)\s*(\d{1,2})(\s*uhr\b)?/i,
-  rAtHour2:       /^(\d{1,2})\s*uhr\b/i,
+  rAtHour:        /^(?:um|ab)\s*(\d{1,4})(\s*uhr\b)?/i,
+  rAtHour2:       /^(\d{1,4})\s*uhr\b/i,
   rDays:          /\b(?:am\s+|ab\s+)?(sonntag|montag|dienstag|mittwoch|donnerstag|freitag|samstag)s?\b/i,
   rMonths:        /^(?:am\s+|ab\s+)?((\d{1,2})(\.))\s+(jan(?:uar)?|feb(?:ruar)?|m(?:ä|ae)r(?:z)?|apr(?:il)?|mai|jun(?:i)?|jul(?:i)?|aug(?:ust)?|sep(?:tember)?|okt(?:ober)?|nov(?:ember)?|dez(?:ember)?)/i,
   rPast:          /\b(letzte(n|r|s)?|gestern|vor)\b/i,

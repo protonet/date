@@ -79,6 +79,24 @@ describe('stunden', function() {
     assert('17:00:00' == t(date));
     assert('5/13/13' == d(date));
   });
+  
+  it('um 1700 Uhr', function () {
+    var date = parse('um 1700 Uhr', mon, "de");
+    assert('17:00:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
+  
+  it('um 1700', function () {
+    var date = parse('um 1700', mon, "de");
+    assert('17:00:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
+  
+  it('1700 Uhr', function () {
+    var date = parse('um 1700', mon, "de");
+    assert('17:00:00' == t(date));
+    assert('5/13/13' == d(date));
+  });
 
   it('um 5', function () {
     var date = parse('um 5', mon, "de");
