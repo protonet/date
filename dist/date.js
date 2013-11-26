@@ -787,7 +787,11 @@ parser.prototype.monthDate = function() {
     }
     
     if (captures[3]) {
-      this.date.date.setYear(parseInt(captures[3], 10));
+      var year = parseInt(captures[3], 10);
+      if (year < 100) {
+        year = parseInt("20" + captures[3], 10);
+      }
+      this.date.date.setYear(year);
       this.date._changed['years'] = true;
     }
     return { type: "monthDate", str: captures[0] };

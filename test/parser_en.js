@@ -907,6 +907,11 @@ describe('month dates', function () {
     assert('13:30:00' == t(date));
     assert('1/22/14' == d(date));
   });
+  
+  it('12/7/13', function () {
+    var date = parse('12/7/13', after, "en");
+    assert(date.date.getFullYear() == 2013);
+  });
 });
 
 

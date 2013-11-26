@@ -1065,6 +1065,11 @@ describe('month dates', function () {
     assert('13:30:00' == t(date));
     assert('11/11/13' == d(date));
   });
+  
+  it('7.12.13', function () {
+    var date = parse('7.12.13', after, "de");
+    assert(date.date.getFullYear() == 2013);
+  });
 });
 
 
