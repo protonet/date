@@ -808,6 +808,12 @@ describe('months (fixes: #10)', function (){
     assert('13:30:00' == t(date));
     assert('11/5/13' == d(date));
   });
+  
+  it('january 22nd 2015', function(){
+    var date = parse('january 22nd 2015', after);
+    assert('13:30:00' == t(date));
+    assert('1/22/15' == d(date));
+  });
 });
 
 /**
@@ -1093,6 +1099,11 @@ describe('gives string without dates', function () {
   it('Today at 6 [@frederik](123)', function () {
     var date = parse('Today at 6 [@frederik](123)', after, "en");
     assert("[@frederik](123)" === date.newStr);
+  });
+  
+  it('Go shopping on january 22nd 2015', function () {
+    var date = parse('Go shopping on january 22nd 2015', after, "en");
+    assert("Go shopping" === date.newStr);
   });
 });
 

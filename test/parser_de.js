@@ -942,6 +942,12 @@ describe('months (fixes: #10)', function (){
     assert('13:30:00' == t(date));
     assert('3/22/14' == d(date));
   });
+  
+  it('22. januar 2015', function(){
+    var date = parse('22. januar 2015', after, "de");
+    assert('13:30:00' == t(date));
+    assert('1/22/15' == d(date));
+  });
 });
 
 /**
@@ -1250,6 +1256,11 @@ describe('gives string without dates', function () {
   it('Ab Mittwoch 17:30 aufräumen', function () {
     var date = parse('Ab Mittwoch 17:30 aufräumen', after, "de");
     assert("Aufräumen" === date.newStr);
+  });
+  
+  it('Shoppen gehen am 22. Januar 2015', function () {
+    var date = parse('Shoppen gehen am 22. Januar 2015', after, "de");
+    assert("Shoppen gehen" === date.newStr);
   });
 });
 

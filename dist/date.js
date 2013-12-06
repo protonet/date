@@ -823,14 +823,17 @@ parser.prototype.monthByName = function() {
   var captures;
   var day;
   var month;
+  var year;
   if (captures = this.locales.rMonths.exec(this.str)) {
     day = captures[2];
     month = captures[4].toLowerCase();
+    year = captures[5];
   } else if (this.locales.rMonths2 && (captures = this.locales.rMonths2.exec(this.str))) {
     day = captures[3];
     month = captures[1].toLowerCase();
+    year = captures[5];
   }
-  
+
   if (day && month) {
     var monthIndex = Math.max(this.locales.months.indexOf(month), this.locales.months2.indexOf(month));
     this.date.date.setMonth(monthIndex);
@@ -838,6 +841,11 @@ parser.prototype.monthByName = function() {
     if (day) {
       this.date.date.setDate(parseInt(day));
       this.date._changed['days'] = true;
+    }
+    
+    if (year) {
+      this.date.date.setFullYear(parseInt(year));
+      this.date._changed['years'] = true;
     }
     this.skip(captures);
     
@@ -1293,8 +1301,8 @@ var date18n = {
   rAtHour:        /^at\s*(\d{1,2})(\s*o(?:\'|\s+)?clock\b)?/i,
   rAtHour2:       /^(\d{1,2})\s*o(?:\'|\s+)?clock\b/i,
   rDays:          /\b(?:(?:on|at)\s+)?(sun(day)?|mon(day)?|tues(day)?|wed(nesday)?|thur(sday|s)?|fri(day)?|sat(urday)?)s?\b/i,
-  rMonths:        /^(?:(?:at|on)\s+(?:the\s+)?)?((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)/i,
-  rMonths2:       /^(?:(?:at|on)\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)[\s\-]+((\d{1,2})(st|nd|rd|th)?)/i,
+  rMonths:        /^(?:(?:at|on)\s+(?:the\s+)?)?((\d{1,2})(st|nd|rd|th))\s+(?:of\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s*?(\d{4})?/i,
+  rMonths2:       /^(?:(?:at|on)\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)[\s\-]+((\d{1,2})(st|nd|rd|th)?)\s*(\d{4})?/i,
   rPast:          /\b(last|yesterday|ago)\b/i,
   rAgo:           /^(\d*)\s?\b(second|sec|minute|min|hour|h|day|week|month|year)[s]?\s+ago\b/i,
   
@@ -1353,7 +1361,7 @@ var date18n = {
   rAtHour:        /^(?:um|ab)\s*(\d{1,4})(\s*uhr\b)?/i,
   rAtHour2:       /^(\d{1,4})\s*uhr\b/i,
   rDays:          /\b(?:am\s+|ab\s+)?(sonntag|montag|dienstag|mittwoch|donnerstag|freitag|samstag)s?\b/i,
-  rMonths:        /^(?:am\s+|ab\s+)?((\d{1,2})(\.))\s+(jan(?:uar)?|feb(?:ruar)?|m(?:ä|ae)r(?:z)?|apr(?:il)?|mai|jun(?:i)?|jul(?:i)?|aug(?:ust)?|sep(?:tember)?|okt(?:ober)?|nov(?:ember)?|dez(?:ember)?)/i,
+  rMonths:        /^(?:am\s+|ab\s+)?((\d{1,2})(\.))\s+(jan(?:uar)?|feb(?:ruar)?|m(?:ä|ae)r(?:z)?|apr(?:il)?|mai|jun(?:i)?|jul(?:i)?|aug(?:ust)?|sep(?:tember)?|okt(?:ober)?|nov(?:ember)?|dez(?:ember)?)\s*(\d{4})?/i,
   rPast:          /\b(letzte(n|r|s)?|gestern|vor)\b/i,
   rAgo:           /^vor\s+(\d*)\s?\b(sekunde|sek|min|minute|stunde|std|tag|woche|monat|jahr)(n|en)?\b/i,
   
