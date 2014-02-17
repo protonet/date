@@ -1262,6 +1262,11 @@ describe('gives string without dates', function () {
     var date = parse('Shoppen gehen am 22. Januar 2015', after, "de");
     assert("Shoppen gehen" === date.newStr);
   });
+  
+  it('Veröffentlichung des Jahresergebnis', function () {
+    var date = parse('Veröffentlichung des Jahresergebnis', after, "de");
+    assert("Veröffentlichung des Jahresergebnis" === date.newStr);
+  });
 });
 
 
