@@ -1385,7 +1385,7 @@ var date18n = {
     rDays:              /^tag(en)?/i,
     rWeeks:             /^woche(n)?/i,
     rMonths:            /^monat(e|en)?\b/i,
-    rYears:             /^jahr(en)?/i,
+    rYears:             /^jahr(e|en)?\b/i,
     rYesterday:         /^gestern/i,
     rToday:             /^heute/i,
     rTomorrow:          /^morgen\b/i,
