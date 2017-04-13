@@ -1016,6 +1016,7 @@ describe('support "ago" modifier (fixes: #20)', function (){
     var date = parse('vor 1 monat', after, "de");
     assert('13:30:00' == t(date));
     assert('4/13/13' == d(date));
+    assert(true === date.fullDay);
   });
   
   it('x year ago', function () {
@@ -1034,6 +1035,7 @@ describe('month dates', function () {
     var date = parse('15.11', after, "de");
     assert('13:30:00' == t(date));
     assert('11/15/13' == d(date));
+    assert(true === date.fullDay);
   });
   
   it('15.11.2022', function () {
@@ -1108,6 +1110,7 @@ describe('gives string without dates', function () {
     assert('pizza essen' === date.newStr);
     assert("5/20/13" === d(date));
     assert("17:00:00" === t(date));
+    assert(false === date.fullDay);
   });
   
   it('nächsten montag um 5 pizza essen', function() {
@@ -1120,6 +1123,7 @@ describe('gives string without dates', function () {
   it('am nächsten montag in die Stadt fahren!', function() {
     var date = parse('am nächsten montag in die Stadt fahren!', after, "de");
     assert('in die Stadt fahren!' === date.newStr);
+    assert(true === date.fullDay);
   });
   
   it('vor 2 wochen in die stadt fahren', function() {
@@ -1155,6 +1159,7 @@ describe('gives string without dates', function () {
   it('morgen am mittag pizza essen mit freunden', function() {
     var date = parse('morgen am nachmittag pizza essen mit freunden', after, "de");
     assert('pizza essen mit freunden' === date.newStr);
+    assert(false === date.fullDay);
   });
   
   it('Am 5. Januar spät abends ins Kino', function() {
@@ -1246,6 +1251,7 @@ describe('gives string without dates', function () {
   it('Heute 18 uhr [@frederik](123)', function () {
     var date = parse('Heute 18 uhr [@frederik](123)', after, "de");
     assert("[@frederik](123)" === date.newStr);
+    assert(false === date.fullDay);
   });
   
   it('Heute ab 18:30 große Feierei', function () {
@@ -1261,6 +1267,7 @@ describe('gives string without dates', function () {
   it('Shoppen gehen am 22. Januar 2015', function () {
     var date = parse('Shoppen gehen am 22. Januar 2015', after, "de");
     assert("Shoppen gehen" === date.newStr);
+    assert(true === date.fullDay);
   });
   
   it('Veröffentlichung des Jahresergebnis', function () {
@@ -1268,7 +1275,6 @@ describe('gives string without dates', function () {
     assert("Veröffentlichung des Jahresergebnis" === date.newStr);
   });
 });
-
 
 /**
  * Time helper function

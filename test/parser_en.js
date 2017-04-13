@@ -84,6 +84,7 @@ describe('hours', function() {
     var date = parse('at 5 o\'clock', mon);
     assert('5:00:00' == t(date));
     assert('5/13/13' == d(date));
+    assert(date.fullDay === false);
   });
 
   it('at 17', function () {
@@ -185,6 +186,7 @@ describe('dates', function () {
     var date = parse('last monday at 1:00am', mon);
     assert('1:00:00' == t(date));
     assert('5/6/13' == d(date));
+    assert(date.fullDay === false);
   });
 });
 
@@ -197,6 +199,7 @@ describe('tomorrow', function () {
     var date = parse('tomorrow at 3pm', mon);
     assert('15:00:00' == t(date));
     assert('5/14/13' == d(date));
+    assert(date.fullDay === false);
   });
 });
 
@@ -216,6 +219,7 @@ describe('today', function () {
     var date = parse('Today 16:22', mon);
     assert('16:22:00' == t(date));
     assert('5/13/13' == d(date));
+    assert(date.fullDay === false);
   });
 });
 
@@ -369,6 +373,7 @@ describe('weeks', function () {
     var date = parse('next week tuesday', mon);
     assert('1:30:00' == t(date));
     assert('5/21/13' == d(date));
+    assert(date.fullDay === true);
   });
 
   it('next wk tuesday', function () {
@@ -390,6 +395,7 @@ describe('weeks', function () {
     var date = parse('Next week', sun);
     assert('1:30:00' == t(date));
     assert('5/20/13' == d(date));
+    assert(date.fullDay === true);
   });
   
   it('Next week', function() {
